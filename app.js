@@ -1,4 +1,4 @@
-const STORAGE_KEY = "ema-budget-builder-v5";
+const STORAGE_KEY = "ema-budget-builder-v6";
 const TEMPLATE_KEY = "ema-budget-templates-v1";
 const TARGET_MARGIN = 0.25;
 const AUTH_KEY = "ema-budget-auth-v1";
@@ -12,6 +12,8 @@ const phaseMap = {
   Interior: "Finish Work",
   "General Conditions": "Site Work & Foundation",
 };
+
+const phaseOrder = ["Site Work & Foundation", "Framing", "MEP", "Finish Work"];
 
 function uid() {
   if (globalThis.crypto?.randomUUID) return globalThis.crypto.randomUUID();
@@ -241,17 +243,17 @@ function manual(phase, scope, labor, material, costType = "split", notes = "") {
 
 function loadState() {
   const saved = localStorage.getItem(STORAGE_KEY);
-  if (!saved) return deepCopy(starterState);
+  if (!saved) return { ...deepCopy(starterState), rows: groupPhaseRows(starterState.rows) };
   try {
     return revive(JSON.parse(saved));
   } catch {
-    return deepCopy(starterState);
+    return { ...deepCopy(starterState), rows: groupPhaseRows(starterState.rows) };
   }
 }
 
 function revive(nextState) {
   const starter = deepCopy(starterState);
-  const rows = normalizePhases(nextState.rows?.length ? nextState.rows : starter.rows).filter((node) => node.phase !== "Preconstruction");
+  const rows = groupPhaseRows(normalizePhases(nextState.rows?.length ? nextState.rows : starter.rows));
   return {
     ...starter,
     ...nextState,
@@ -267,6 +269,26 @@ function normalizePhases(rows) {
     phase: phaseMap[node.phase] || node.phase,
     children: normalizePhases(node.children || []),
   }));
+}
+
+function groupPhaseRows(rows) {
+  const cleanRows = rows.filter((node) => node.phase !== "Preconstruction");
+  const alreadyGrouped = cleanRows.length === phaseOrder.length && cleanRows.every((node) => phaseOrder.includes(node.phase) && node.scope === node.phase && node.children?.length);
+  if (alreadyGrouped) return cleanRows;
+
+  return phaseOrder.map((phase) =>
+    row(
+      phase,
+      phase,
+      "",
+      0,
+      0,
+      "Estimated",
+      "Low",
+      "",
+      cleanRows.filter((node) => node.phase === phase),
+    ),
+  );
 }
 
 function saveState() {
@@ -315,7 +337,7 @@ function calculate(node) {
 function flatten(rows, depth = 0, parentOpen = true, list = []) {
   rows.forEach((node, index) => {
     const hasChildren = Boolean(node.children?.length);
-    const open = state.expanded[node.id] ?? depth < 1;
+    const open = state.expanded[node.id] ?? false;
     list.push({ node, depth, hasChildren, open, visible: parentOpen, index });
     if (hasChildren) {
       flatten(node.children, depth + 1, parentOpen && open, list);
