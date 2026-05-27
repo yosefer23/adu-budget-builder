@@ -22,6 +22,7 @@ body {
   margin: 0;
   background: #fbfcfa;
   color: var(--ink);
+  overflow-x: hidden;
 }
 
 body.is-locked {
@@ -225,6 +226,7 @@ h1 {
   display: flex;
   flex-direction: column;
   gap: 6px;
+  min-width: 0;
 }
 
 .control-group label {
@@ -541,7 +543,8 @@ menu {
 
 @media (max-width: 560px) {
   main {
-    width: min(100% - 18px, 1440px);
+    width: 100%;
+    padding: 0 8px;
     margin-bottom: 28px;
   }
 
@@ -588,16 +591,11 @@ menu {
     grid-template-columns: 1fr;
     gap: 10px;
     padding: 11px;
+    overflow: hidden;
   }
 
-  .toggle-row {
-    flex-wrap: nowrap;
-    overflow-x: auto;
-    padding-bottom: 2px;
-  }
-
-  .toggle-row label {
-    flex: 0 0 auto;
+  .control-group.grow {
+    display: none;
   }
 
   .budget-shell {
@@ -617,7 +615,7 @@ menu {
   }
 
   .budget-row {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     min-width: 0;
     border: 1px solid var(--line);
     border-radius: 8px;
@@ -635,8 +633,9 @@ menu {
 
   .cell {
     min-height: 38px;
+    align-items: flex-start;
     justify-content: space-between;
-    gap: 14px;
+    gap: 8px;
     padding: 8px 11px;
     border-right: 0;
     border-top: 1px solid #edf0ed;
@@ -649,14 +648,16 @@ menu {
     color: var(--muted);
     font-size: 0.72rem;
     font-weight: 900;
+    line-height: 1.2;
     text-align: left;
     text-transform: uppercase;
   }
 
   .cell[data-col="scope"] {
+    grid-column: 1 / -1;
     align-items: flex-start;
     justify-content: flex-start;
-    padding: 11px;
+    padding: 13px 11px;
     border-top: 0;
     text-align: left;
   }
@@ -665,17 +666,53 @@ menu {
     display: none;
   }
 
+  .cell[data-col="labor"],
+  .cell[data-col="material"] {
+    min-height: 52px;
+    flex-direction: column;
+    justify-content: center;
+    text-align: left;
+  }
+
+  .cell[data-col="labor"]::before,
+  .cell[data-col="material"]::before {
+    margin-bottom: 2px;
+  }
+
+  .cell[data-col="total"] {
+    grid-column: 1 / -1;
+    min-height: 54px;
+    align-items: center;
+    background: #f4f8f5;
+    font-size: 1.08rem;
+    font-weight: 900;
+  }
+
+  .cell[data-col="status"],
+  .cell[data-col="risk"] {
+    align-items: center;
+  }
+
   .cell[data-col="notes"] {
+    grid-column: 1 / -1;
+    flex-direction: column;
     align-items: flex-start;
+    text-align: left;
+  }
+
+  .cell[data-col="notes"]:empty {
+    display: none;
   }
 
   .cell[data-col="actions"] {
+    grid-column: 1 / -1;
+    align-items: center;
     justify-content: flex-end;
     background: #fafbf8;
   }
 
   .money {
-    justify-content: space-between;
+    justify-content: flex-start;
   }
 
   .indent {
