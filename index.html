@@ -3,10 +3,24 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex, nofollow" />
     <title>Eastern Mass ADU Budget</title>
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
+    <section id="passwordGate" class="password-gate" aria-label="Budget sign in">
+      <form id="passwordForm" class="password-panel">
+        <p class="eyebrow">Private Budget</p>
+        <h1>ADU Budget Builder</h1>
+        <label>
+          Password
+          <input id="passwordInput" type="password" autocomplete="current-password" required />
+        </label>
+        <p id="passwordError" class="password-error" role="alert" hidden>Wrong password. Try again.</p>
+        <button type="submit">Open Budget</button>
+      </form>
+    </section>
+
     <header class="topbar">
       <div>
         <p class="eyebrow">Eastern Mass ADU</p>
@@ -68,53 +82,7 @@
 
       <section class="budget-shell" aria-label="Budget table">
         <div class="table-header" id="tableHeader"></div>
-        <div id="budgetRows" class="rows">
-          <table class="fallback-table" aria-label="Starter budget fallback">
-            <thead>
-              <tr>
-                <th>Phase</th>
-                <th>Trade / Scope</th>
-                <th>Sub / Vendor</th>
-                <th>Labor</th>
-                <th>Material</th>
-                <th>Total</th>
-                <th>Notes</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr><td>Sitework</td><td>Foundation Dig</td><td>Chris</td><td>$8,000</td><td>$0</td><td>$8,000</td><td>Need to get quote from Chris</td></tr>
-              <tr><td>Sitework</td><td>Electric Trench</td><td>Chris</td><td>$1,000</td><td>$0</td><td>$1,000</td><td>Need to get quote from Chris</td></tr>
-              <tr><td>Sitework</td><td>Water Line Trench</td><td>Chris</td><td>$1,000</td><td>$0</td><td>$1,000</td><td>Need to get quote from Chris</td></tr>
-              <tr><td>Sitework</td><td>Foundation Penetration</td><td>Core Drill guy - Rich Bradley</td><td>$1,000</td><td>$0</td><td>$1,000</td><td>Based on 600 dollar price</td></tr>
-              <tr><td>Sitework</td><td>Septic</td><td>Chris</td><td>$25,000</td><td>$0</td><td>$25,000</td><td>Need to get quote from Chris</td></tr>
-              <tr><td>Sitework</td><td>Landscape</td><td>Unknown</td><td>$2,000</td><td>$2,000</td><td>$4,000</td><td>What would this include</td></tr>
-              <tr><td>Foundation</td><td>Foundation</td><td>Ourselves</td><td>$10,000</td><td>$25,000</td><td>$35,000</td><td>Nested footing, walls, and slab detail in interactive view</td></tr>
-              <tr><td>Foundation</td><td>Lally Columns</td><td>Ourselves</td><td>$0</td><td>$300</td><td>$300</td><td>Based on BFS Quote</td></tr>
-              <tr><td>Foundation</td><td>Foundation Finish</td><td>Ourselves</td><td>$1,000</td><td>$1,000</td><td>$2,000</td><td>Need to review this</td></tr>
-              <tr><td>Shell</td><td>Framing</td><td>BPI</td><td>$16,530</td><td>$15,400</td><td>$31,930</td><td>Based on BFS and BPI Quote</td></tr>
-              <tr><td>Shell</td><td>Decking and Railings</td><td>Supplies</td><td>$0</td><td>$2,000</td><td>$2,000</td><td>Need to confirm Home Depot pricing</td></tr>
-              <tr><td>Shell</td><td>Roofing</td><td>BPI</td><td>$1,380</td><td>$3,500</td><td>$4,880</td><td>Based on BFS and BPI Quote</td></tr>
-              <tr><td>Shell</td><td>Siding</td><td>BPI</td><td>$3,980</td><td>$5,000</td><td>$8,980</td><td>Based on BFS and BPI Quote</td></tr>
-              <tr><td>Shell</td><td>Gutters?</td><td>BPI?</td><td>$1,000</td><td>$1,000</td><td>$2,000</td><td>This is not included in BPI Quote</td></tr>
-              <tr><td>Shell</td><td>Windows (9)</td><td>BPI</td><td>$0</td><td>$4,000</td><td>$4,000</td><td>Windows part of BPI Quote</td></tr>
-              <tr><td>Shell</td><td>Doors</td><td>BPI</td><td>$0</td><td>$1,000</td><td>$1,000</td><td>Doors and hardware</td></tr>
-              <tr><td>MEP Rough-In</td><td>Plumbing</td><td>Scott</td><td>$15,000</td><td>$5,000</td><td>$20,000</td><td>Need price from Scott</td></tr>
-              <tr><td>MEP Rough-In</td><td>Electrical</td><td>Raven</td><td>$20,000</td><td>$1,000</td><td>$21,000</td><td>Need price from Raven</td></tr>
-              <tr><td>MEP Rough-In</td><td>HVAC</td><td>Scott?</td><td>$10,000</td><td>$5,000</td><td>$15,000</td><td></td></tr>
-              <tr><td>MEP Rough-In</td><td>Air exchange</td><td>?</td><td>$1,000</td><td>$1,000</td><td>$2,000</td><td></td></tr>
-              <tr><td>Interior</td><td>Insulation</td><td>RDP Insulation</td><td>$6,000</td><td>$0</td><td>$6,000</td><td></td></tr>
-              <tr><td>Interior</td><td>Drywall</td><td>Wesley</td><td>$6,000</td><td>$1,000</td><td>$7,000</td><td></td></tr>
-              <tr><td>Interior</td><td>Flooring</td><td>Floor guy</td><td>$4,000</td><td>$3,600</td><td>$7,600</td><td></td></tr>
-              <tr><td>Interior</td><td>Interior Doors</td><td></td><td>$2,000</td><td>$0</td><td>$2,000</td><td></td></tr>
-              <tr><td>Interior</td><td>Finish Carpentry</td><td>Wesley</td><td>$12,000</td><td>$4,000</td><td>$16,000</td><td></td></tr>
-              <tr><td>Interior</td><td>Kitchen</td><td>Supplies</td><td>$0</td><td>$12,000</td><td>$12,000</td><td></td></tr>
-              <tr><td>Interior</td><td>Paint</td><td>Wesley</td><td>$8,000</td><td>$840</td><td>$8,840</td><td></td></tr>
-              <tr><td>Interior</td><td>Punch List</td><td>David & Yosef</td><td>$5,000</td><td>$0</td><td>$5,000</td><td></td></tr>
-              <tr><td>General Conditions</td><td>Dumpster</td><td>Rental</td><td>$0</td><td>$3,000</td><td>$3,000</td><td></td></tr>
-              <tr><td>General Conditions</td><td>Toilet</td><td>Rental</td><td>$0</td><td>$1,000</td><td>$1,000</td><td></td></tr>
-            </tbody>
-          </table>
-        </div>
+        <div id="budgetRows" class="rows"></div>
       </section>
     </main>
 

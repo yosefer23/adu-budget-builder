@@ -1,6 +1,8 @@
 const STORAGE_KEY = "ema-budget-builder-v2";
 const TEMPLATE_KEY = "ema-budget-templates-v1";
 const TARGET_MARGIN = 0.25;
+const AUTH_KEY = "ema-budget-auth-v1";
+const PASSWORD_HASH = "1f486ca655a0e21976283fa390b88097259ba393cd7cd6145c20cdd3986b97af";
 
 function uid() {
   if (globalThis.crypto?.randomUUID) return globalThis.crypto.randomUUID();
@@ -116,6 +118,10 @@ let state = loadState();
 let activeId = null;
 
 const els = {
+  gate: document.getElementById("passwordGate"),
+  passwordForm: document.getElementById("passwordForm"),
+  passwordInput: document.getElementById("passwordInput"),
+  passwordError: document.getElementById("passwordError"),
   rows: document.getElementById("budgetRows"),
   header: document.getElementById("tableHeader"),
   toggles: document.getElementById("columnToggles"),
@@ -129,6 +135,32 @@ const els = {
   dialog: document.getElementById("editorDialog"),
   form: document.getElementById("editorForm"),
 };
+
+document.body.classList.toggle("is-locked", sessionStorage.getItem(AUTH_KEY) !== "ok");
+
+async function sha256(value) {
+  const bytes = new TextEncoder().encode(value);
+  const buffer = await crypto.subtle.digest("SHA-256", bytes);
+  return [...new Uint8Array(buffer)].map((byte) => byte.toString(16).padStart(2, "0")).join("");
+}
+
+function unlockBudget() {
+  sessionStorage.setItem(AUTH_KEY, "ok");
+  document.body.classList.remove("is-locked");
+  els.gate.classList.add("is-unlocked");
+}
+
+async function checkPassword(event) {
+  event.preventDefault();
+  const hash = await sha256(els.passwordInput.value);
+  if (hash === PASSWORD_HASH) {
+    unlockBudget();
+    els.passwordInput.value = "";
+    return;
+  }
+  els.passwordError.hidden = false;
+  els.passwordInput.select();
+}
 
 function row(phase, scope, sub, labor = 0, material = 0, status = "Estimated", risk = "Low", notes = "", children = []) {
   const [fallbackStatus, fallbackRisk] = statusBySub[sub] || [];
@@ -615,5 +647,7 @@ document.getElementById("collapseAll").addEventListener("click", () => setAllExp
 document.getElementById("copyBudget").addEventListener("click", copyBudget);
 document.getElementById("saveTemplate").addEventListener("click", saveTemplate);
 document.getElementById("resetDemo").addEventListener("click", resetDemo);
+els.passwordForm.addEventListener("submit", checkPassword);
+if (sessionStorage.getItem(AUTH_KEY) === "ok") unlockBudget();
 
 render();
