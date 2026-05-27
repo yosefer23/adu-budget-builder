@@ -542,10 +542,152 @@ menu {
 @media (max-width: 560px) {
   main {
     width: min(100% - 18px, 1440px);
+    margin-bottom: 28px;
+  }
+
+  .topbar {
+    gap: 14px;
+    padding: 18px 12px;
+  }
+
+  .toolbar {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    width: 100%;
+  }
+
+  .toolbar button {
+    width: 100%;
   }
 
   .summary-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+    margin-top: 12px;
+  }
+
+  .metric {
+    min-height: 82px;
+    padding: 11px;
+  }
+
+  .metric.editable {
+    grid-column: 1 / -1;
+  }
+
+  .metric span {
+    font-size: 0.76rem;
+  }
+
+  .metric strong,
+  .metric input {
+    font-size: 1.18rem;
+  }
+
+  .controls-band {
     grid-template-columns: 1fr;
+    gap: 10px;
+    padding: 11px;
+  }
+
+  .toggle-row {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    padding-bottom: 2px;
+  }
+
+  .toggle-row label {
+    flex: 0 0 auto;
+  }
+
+  .budget-shell {
+    border: 0;
+    background: transparent;
+    box-shadow: none;
+  }
+
+  .table-header {
+    display: none;
+  }
+
+  .rows {
+    display: grid;
+    gap: 10px;
+    overflow-x: visible;
+  }
+
+  .budget-row {
+    grid-template-columns: 1fr;
+    min-width: 0;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    box-shadow: var(--shadow);
+    overflow: hidden;
+  }
+
+  .budget-row.phase-start {
+    border-top: 1px solid var(--line);
+  }
+
+  .budget-row.group {
+    background: var(--surface);
+  }
+
+  .cell {
+    min-height: 38px;
+    justify-content: space-between;
+    gap: 14px;
+    padding: 8px 11px;
+    border-right: 0;
+    border-top: 1px solid #edf0ed;
+    text-align: right;
+  }
+
+  .cell::before {
+    content: attr(data-label);
+    flex: 0 0 auto;
+    color: var(--muted);
+    font-size: 0.72rem;
+    font-weight: 900;
+    text-align: left;
+    text-transform: uppercase;
+  }
+
+  .cell[data-col="scope"] {
+    align-items: flex-start;
+    justify-content: flex-start;
+    padding: 11px;
+    border-top: 0;
+    text-align: left;
+  }
+
+  .cell[data-col="scope"]::before {
+    display: none;
+  }
+
+  .cell[data-col="notes"] {
+    align-items: flex-start;
+  }
+
+  .cell[data-col="actions"] {
+    justify-content: flex-end;
+    background: #fafbf8;
+  }
+
+  .money {
+    justify-content: space-between;
+  }
+
+  .indent {
+    width: min(var(--indent), 44px);
+  }
+
+  .row-title strong {
+    font-size: 1rem;
+  }
+
+  .actions {
+    justify-content: flex-end;
   }
 
   menu {

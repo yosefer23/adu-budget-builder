@@ -394,6 +394,7 @@ function cell(keyAndClass, content) {
   const div = document.createElement("div");
   div.className = ["cell", ...classes].join(" ");
   div.dataset.col = key;
+  div.dataset.label = columns.find((column) => column.key === key)?.label || "";
   if (state.hiddenColumns.includes(key)) div.classList.add("is-hidden-col");
   if (typeof content === "string") div.textContent = content;
   else div.append(content);
