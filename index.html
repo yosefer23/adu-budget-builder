@@ -1,0 +1,205 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Eastern Mass ADU Budget</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <div>
+        <p class="eyebrow">Eastern Mass ADU</p>
+        <h1>Fixed-Price Budget Builder</h1>
+      </div>
+      <div class="toolbar">
+        <button id="expandAll" type="button" title="Expand all rows">Expand</button>
+        <button id="collapseAll" type="button" title="Collapse all rows">Collapse</button>
+        <button id="copyBudget" type="button" title="Copy this whole budget as a new project">Copy Budget</button>
+        <button id="saveTemplate" type="button" title="Save this project as a reusable template">Save Template</button>
+        <button id="resetDemo" type="button" class="ghost" title="Reset to the starter budget">Reset</button>
+      </div>
+    </header>
+
+    <main>
+      <section class="summary-grid" aria-label="Project summary">
+        <label class="metric editable">
+          <span>Contract Value</span>
+          <input id="contractValue" type="number" min="0" step="500" value="322500" />
+        </label>
+        <div class="metric">
+          <span>Total Cost</span>
+          <strong id="totalCost">$258,530</strong>
+        </div>
+        <div class="metric">
+          <span>Projected Profit</span>
+          <strong id="profit">$63,970</strong>
+        </div>
+        <div class="metric">
+          <span>Margin</span>
+          <strong id="margin">19.8%</strong>
+        </div>
+        <div class="metric">
+          <span>25% Target Gap</span>
+          <strong id="targetGap">-$16,655</strong>
+        </div>
+      </section>
+
+      <section class="controls-band" aria-label="Budget controls">
+        <div class="control-group">
+          <label for="projectName">Project</label>
+          <input id="projectName" type="text" value="7 Jennifer Sub & Cost Planner" />
+        </div>
+        <div class="control-group">
+          <label for="viewFilter">View</label>
+          <select id="viewFilter">
+            <option value="all">All rows</option>
+            <option value="risk">Risk or placeholder</option>
+            <option value="quoted">Quoted / locked</option>
+            <option value="materials">Rows with materials</option>
+            <option value="labor">Rows with labor</option>
+          </select>
+        </div>
+        <div class="control-group grow">
+          <label>Columns</label>
+          <div id="columnToggles" class="toggle-row"></div>
+        </div>
+      </section>
+
+      <section class="budget-shell" aria-label="Budget table">
+        <div class="table-header" id="tableHeader"></div>
+        <div id="budgetRows" class="rows">
+          <table class="fallback-table" aria-label="Starter budget fallback">
+            <thead>
+              <tr>
+                <th>Phase</th>
+                <th>Trade / Scope</th>
+                <th>Sub / Vendor</th>
+                <th>Labor</th>
+                <th>Material</th>
+                <th>Total</th>
+                <th>Notes</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td>Sitework</td><td>Foundation Dig</td><td>Chris</td><td>$8,000</td><td>$0</td><td>$8,000</td><td>Need to get quote from Chris</td></tr>
+              <tr><td>Sitework</td><td>Electric Trench</td><td>Chris</td><td>$1,000</td><td>$0</td><td>$1,000</td><td>Need to get quote from Chris</td></tr>
+              <tr><td>Sitework</td><td>Water Line Trench</td><td>Chris</td><td>$1,000</td><td>$0</td><td>$1,000</td><td>Need to get quote from Chris</td></tr>
+              <tr><td>Sitework</td><td>Foundation Penetration</td><td>Core Drill guy - Rich Bradley</td><td>$1,000</td><td>$0</td><td>$1,000</td><td>Based on 600 dollar price</td></tr>
+              <tr><td>Sitework</td><td>Septic</td><td>Chris</td><td>$25,000</td><td>$0</td><td>$25,000</td><td>Need to get quote from Chris</td></tr>
+              <tr><td>Sitework</td><td>Landscape</td><td>Unknown</td><td>$2,000</td><td>$2,000</td><td>$4,000</td><td>What would this include</td></tr>
+              <tr><td>Foundation</td><td>Foundation</td><td>Ourselves</td><td>$10,000</td><td>$25,000</td><td>$35,000</td><td>Nested footing, walls, and slab detail in interactive view</td></tr>
+              <tr><td>Foundation</td><td>Lally Columns</td><td>Ourselves</td><td>$0</td><td>$300</td><td>$300</td><td>Based on BFS Quote</td></tr>
+              <tr><td>Foundation</td><td>Foundation Finish</td><td>Ourselves</td><td>$1,000</td><td>$1,000</td><td>$2,000</td><td>Need to review this</td></tr>
+              <tr><td>Shell</td><td>Framing</td><td>BPI</td><td>$16,530</td><td>$15,400</td><td>$31,930</td><td>Based on BFS and BPI Quote</td></tr>
+              <tr><td>Shell</td><td>Decking and Railings</td><td>Supplies</td><td>$0</td><td>$2,000</td><td>$2,000</td><td>Need to confirm Home Depot pricing</td></tr>
+              <tr><td>Shell</td><td>Roofing</td><td>BPI</td><td>$1,380</td><td>$3,500</td><td>$4,880</td><td>Based on BFS and BPI Quote</td></tr>
+              <tr><td>Shell</td><td>Siding</td><td>BPI</td><td>$3,980</td><td>$5,000</td><td>$8,980</td><td>Based on BFS and BPI Quote</td></tr>
+              <tr><td>Shell</td><td>Gutters?</td><td>BPI?</td><td>$1,000</td><td>$1,000</td><td>$2,000</td><td>This is not included in BPI Quote</td></tr>
+              <tr><td>Shell</td><td>Windows (9)</td><td>BPI</td><td>$0</td><td>$4,000</td><td>$4,000</td><td>Windows part of BPI Quote</td></tr>
+              <tr><td>Shell</td><td>Doors</td><td>BPI</td><td>$0</td><td>$1,000</td><td>$1,000</td><td>Doors and hardware</td></tr>
+              <tr><td>MEP Rough-In</td><td>Plumbing</td><td>Scott</td><td>$15,000</td><td>$5,000</td><td>$20,000</td><td>Need price from Scott</td></tr>
+              <tr><td>MEP Rough-In</td><td>Electrical</td><td>Raven</td><td>$20,000</td><td>$1,000</td><td>$21,000</td><td>Need price from Raven</td></tr>
+              <tr><td>MEP Rough-In</td><td>HVAC</td><td>Scott?</td><td>$10,000</td><td>$5,000</td><td>$15,000</td><td></td></tr>
+              <tr><td>MEP Rough-In</td><td>Air exchange</td><td>?</td><td>$1,000</td><td>$1,000</td><td>$2,000</td><td></td></tr>
+              <tr><td>Interior</td><td>Insulation</td><td>RDP Insulation</td><td>$6,000</td><td>$0</td><td>$6,000</td><td></td></tr>
+              <tr><td>Interior</td><td>Drywall</td><td>Wesley</td><td>$6,000</td><td>$1,000</td><td>$7,000</td><td></td></tr>
+              <tr><td>Interior</td><td>Flooring</td><td>Floor guy</td><td>$4,000</td><td>$3,600</td><td>$7,600</td><td></td></tr>
+              <tr><td>Interior</td><td>Interior Doors</td><td></td><td>$2,000</td><td>$0</td><td>$2,000</td><td></td></tr>
+              <tr><td>Interior</td><td>Finish Carpentry</td><td>Wesley</td><td>$12,000</td><td>$4,000</td><td>$16,000</td><td></td></tr>
+              <tr><td>Interior</td><td>Kitchen</td><td>Supplies</td><td>$0</td><td>$12,000</td><td>$12,000</td><td></td></tr>
+              <tr><td>Interior</td><td>Paint</td><td>Wesley</td><td>$8,000</td><td>$840</td><td>$8,840</td><td></td></tr>
+              <tr><td>Interior</td><td>Punch List</td><td>David & Yosef</td><td>$5,000</td><td>$0</td><td>$5,000</td><td></td></tr>
+              <tr><td>General Conditions</td><td>Dumpster</td><td>Rental</td><td>$0</td><td>$3,000</td><td>$3,000</td><td></td></tr>
+              <tr><td>General Conditions</td><td>Toilet</td><td>Rental</td><td>$0</td><td>$1,000</td><td>$1,000</td><td></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+
+    <dialog id="editorDialog">
+      <form method="dialog" id="editorForm">
+        <div class="dialog-head">
+          <h2 id="editorTitle">Edit Row</h2>
+          <button type="button" id="closeDialog" class="icon-button" aria-label="Close">×</button>
+        </div>
+        <div class="form-grid">
+          <label>
+            Phase
+            <input name="phase" type="text" />
+          </label>
+          <label>
+            Trade / Scope
+            <input name="scope" type="text" required />
+          </label>
+          <label>
+            Sub / Vendor
+            <input name="sub" type="text" />
+          </label>
+          <label>
+            Status
+            <select name="status">
+              <option>Placeholder</option>
+              <option>Estimated</option>
+              <option>Quoted</option>
+              <option>Selected</option>
+              <option>Locked</option>
+              <option>Ordered</option>
+            </select>
+          </label>
+          <label>
+            Risk
+            <select name="risk">
+              <option>Low</option>
+              <option>Medium</option>
+              <option>High</option>
+            </select>
+          </label>
+          <label>
+            Cost Type
+            <select name="costType">
+              <option value="split">Labor and material</option>
+              <option value="labor">Labor</option>
+              <option value="material">Material</option>
+            </select>
+          </label>
+          <label>
+            Quantity
+            <input name="qty" type="number" step="0.01" min="0" />
+          </label>
+          <label>
+            Unit
+            <input name="unit" type="text" />
+          </label>
+          <label>
+            Unit Cost
+            <input name="unitCost" type="number" step="0.01" min="0" />
+          </label>
+          <label>
+            Labor Cost
+            <input name="labor" type="number" step="0.01" min="0" />
+          </label>
+          <label>
+            Material Cost
+            <input name="material" type="number" step="0.01" min="0" />
+          </label>
+          <label class="wide">
+            Notes
+            <textarea name="notes" rows="3"></textarea>
+          </label>
+        </div>
+        <menu>
+          <button type="button" id="deleteRow" class="danger">Delete</button>
+          <span></span>
+          <button type="button" id="addGroup">Add Group</button>
+          <button type="button" id="addItem">Add Item</button>
+          <button value="cancel" type="button" id="cancelEdit">Cancel</button>
+          <button value="default" id="saveRow">Save</button>
+        </menu>
+      </form>
+    </dialog>
+
+    <script src="app.js?v=3"></script>
+  </body>
+</html>
