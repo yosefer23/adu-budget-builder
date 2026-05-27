@@ -1,4 +1,4 @@
-const STORAGE_KEY = "ema-budget-builder-v4";
+const STORAGE_KEY = "ema-budget-builder-v5";
 const TEMPLATE_KEY = "ema-budget-templates-v1";
 const TARGET_MARGIN = 0.25;
 const AUTH_KEY = "ema-budget-auth-v1";
@@ -51,8 +51,6 @@ const starterState = {
   hiddenColumns: [],
   expanded: {},
   rows: [
-    row("Preconstruction", "Preconstruction", "", 0, 0, "Placeholder", "Medium", "No preconstruction line items were included in this sheet yet."),
-
     row("Site Work & Foundation", "Foundation Dig", "Chris", 8000, 0, "Estimated", "Medium", "Based on Chris's 40k."),
     row("Site Work & Foundation", "Electric Trench", "Chris", 1000, 0, "Estimated", "Medium", "Based on Chris's 40k."),
     row("Site Work & Foundation", "Water Line Trench", "Chris", 1000, 0, "Estimated", "Medium", "Based on Chris's 40k."),
@@ -253,7 +251,7 @@ function loadState() {
 
 function revive(nextState) {
   const starter = deepCopy(starterState);
-  const rows = ensurePreconstructionRows(normalizePhases(nextState.rows?.length ? nextState.rows : starter.rows));
+  const rows = normalizePhases(nextState.rows?.length ? nextState.rows : starter.rows).filter((node) => node.phase !== "Preconstruction");
   return {
     ...starter,
     ...nextState,
@@ -269,15 +267,6 @@ function normalizePhases(rows) {
     phase: phaseMap[node.phase] || node.phase,
     children: normalizePhases(node.children || []),
   }));
-}
-
-function ensurePreconstructionRows(rows) {
-  if (rows.some((node) => node.phase === "Preconstruction")) return rows;
-  return [
-    row("Preconstruction", "Design / Engineering", "", 0, 0, "Placeholder", "High", "Add design, engineering, survey, and permitting costs here."),
-    row("Preconstruction", "Permits and Fees", "", 0, 0, "Placeholder", "High", "Track town, utility, and application fees here."),
-    ...rows,
-  ];
 }
 
 function saveState() {
