@@ -4,6 +4,15 @@ const TARGET_MARGIN = 0.25;
 const AUTH_KEY = "ema-budget-auth-v1";
 const PASSWORD_HASH = "1f486ca655a0e21976283fa390b88097259ba393cd7cd6145c20cdd3986b97af";
 
+const phaseMap = {
+  Sitework: "Site Work & Foundation",
+  Foundation: "Site Work & Foundation",
+  Shell: "Framing",
+  "MEP Rough-In": "MEP",
+  Interior: "Finish Work",
+  "General Conditions": "Site Work & Foundation",
+};
+
 function uid() {
   if (globalThis.crypto?.randomUUID) return globalThis.crypto.randomUUID();
   return `id-${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`;
@@ -42,75 +51,78 @@ const starterState = {
   hiddenColumns: [],
   expanded: {},
   rows: [
-    row("Sitework", "Foundation Dig", "Chris", 8000, 0, "Estimated", "Medium", "Need to get quote from Chris"),
-    row("Sitework", "Electric Trench", "Chris", 1000, 0, "Estimated", "Medium", "Need to get quote from Chris"),
-    row("Sitework", "Water Line Trench", "Chris", 1000, 0, "Estimated", "Medium", "Need to get quote from Chris"),
-    row("Sitework", "Foundation Penetration", "Core Drill guy - Rich Bradley", 1000, 0, "Estimated", "Medium", "Based on 600 dollar price"),
-    row("Sitework", "Septic", "Chris", 25000, 0, "Estimated", "Medium", "Need to get quote from Chris"),
-    row("Sitework", "Walkway?", "Chris", 0, 0, "Placeholder", "High"),
-    row("Sitework", "Landscape", "Unknown", 2000, 2000, "Placeholder", "High", "What would this include"),
+    row("Preconstruction", "Design / Engineering", "", 0, 0, "Placeholder", "High", "Add design, engineering, survey, and permitting costs here."),
+    row("Preconstruction", "Permits and Fees", "", 0, 0, "Placeholder", "High", "Track town, utility, and application fees here."),
 
-    row("Foundation", "Foundation", "Ourselves", 10000, 0, "Estimated", "Medium", "Basement cost is at 22.5k", [
-      group("Foundation", "Footing", [
-        item("Foundation", "2x4x16ft form boards", 15, "board", 12.68, "material"),
-        item("Foundation", "Fastfoot membrane", 2, "100 foot rolls", 144.2, "material"),
-        item("Foundation", "Fastfoot membrane corners", 4, "corners", 12.84, "material"),
-        item("Foundation", "Rebar chairs", 45, "pieces", 1.2, "material"),
-        item("Foundation", "Rebar", 26, "20 foot sticks", 9.89, "material", "two horizontals"),
-        item("Foundation", "Line pump", 1, "per use", 750, "material"),
-        item("Foundation", "Concrete", 6, "yards", 200, "material", "124 CF"),
+    row("Site Work & Foundation", "Foundation Dig", "Chris", 8000, 0, "Estimated", "Medium", "Need to get quote from Chris"),
+    row("Site Work & Foundation", "Electric Trench", "Chris", 1000, 0, "Estimated", "Medium", "Need to get quote from Chris"),
+    row("Site Work & Foundation", "Water Line Trench", "Chris", 1000, 0, "Estimated", "Medium", "Need to get quote from Chris"),
+    row("Site Work & Foundation", "Foundation Penetration", "Core Drill guy - Rich Bradley", 1000, 0, "Estimated", "Medium", "Based on 600 dollar price"),
+    row("Site Work & Foundation", "Septic", "Chris", 25000, 0, "Estimated", "Medium", "Need to get quote from Chris"),
+    row("Site Work & Foundation", "Walkway?", "Chris", 0, 0, "Placeholder", "High"),
+    row("Site Work & Foundation", "Landscape", "Unknown", 2000, 2000, "Placeholder", "High", "What would this include"),
+
+    row("Site Work & Foundation", "Foundation", "Ourselves", 10000, 0, "Estimated", "Medium", "Basement cost is at 22.5k", [
+      group("Site Work & Foundation", "Footing", [
+        item("Site Work & Foundation", "2x4x16ft form boards", 15, "board", 12.68, "material"),
+        item("Site Work & Foundation", "Fastfoot membrane", 2, "100 foot rolls", 144.2, "material"),
+        item("Site Work & Foundation", "Fastfoot membrane corners", 4, "corners", 12.84, "material"),
+        item("Site Work & Foundation", "Rebar chairs", 45, "pieces", 1.2, "material"),
+        item("Site Work & Foundation", "Rebar", 26, "20 foot sticks", 9.89, "material", "two horizontals"),
+        item("Site Work & Foundation", "Line pump", 1, "per use", 750, "material"),
+        item("Site Work & Foundation", "Concrete", 6, "yards", 200, "material", "124 CF"),
       ]),
-      group("Foundation", "Walls", [
-        item("Foundation", "ICF straight walls", 66, "pieces", 75.77, "material"),
-        item("Foundation", "ICF Corners", 18, "pieces", 40.01, "material"),
-        item("Foundation", "Form Lock", 14, "sections", 15.02, "material", "10 foot lengths"),
-        item("Foundation", "Joint clips", 1, "box", 205, "material"),
-        item("Foundation", "Waterproof membrane", 4, "rolls", 243, "material", "1 roll covers 210 square feet"),
-        item("Foundation", "Spray foam cans", 3, "cans", 16.88, "material"),
-        manual("Foundation", "7% surcharge", 0, 501, "material"),
-        item("Foundation", "J bolts", 30, "bolts", 2.13, "material"),
-        item("Foundation", "Rebar", 58, "20 foot sticks", 9.89, "material", "16 top/bottom horizontal; 15 for 60; 4.5 foot verticals"),
-        manual("Foundation", "Pump Truck", 0, 1000, "material"),
-        item("Foundation", "U Haul", 1, "20 foot truck rental", 350, "material"),
-        item("Foundation", "Concrete", 17, "yards", 200, "material", "571 cubic feet"),
+      group("Site Work & Foundation", "Walls", [
+        item("Site Work & Foundation", "ICF straight walls", 66, "pieces", 75.77, "material"),
+        item("Site Work & Foundation", "ICF Corners", 18, "pieces", 40.01, "material"),
+        item("Site Work & Foundation", "Form Lock", 14, "sections", 15.02, "material", "10 foot lengths"),
+        item("Site Work & Foundation", "Joint clips", 1, "box", 205, "material"),
+        item("Site Work & Foundation", "Waterproof membrane", 4, "rolls", 243, "material", "1 roll covers 210 square feet"),
+        item("Site Work & Foundation", "Spray foam cans", 3, "cans", 16.88, "material"),
+        manual("Site Work & Foundation", "7% surcharge", 0, 501, "material"),
+        item("Site Work & Foundation", "J bolts", 30, "bolts", 2.13, "material"),
+        item("Site Work & Foundation", "Rebar", 58, "20 foot sticks", 9.89, "material", "16 top/bottom horizontal; 15 for 60; 4.5 foot verticals"),
+        manual("Site Work & Foundation", "Pump Truck", 0, 1000, "material"),
+        item("Site Work & Foundation", "U Haul", 1, "20 foot truck rental", 350, "material"),
+        item("Site Work & Foundation", "Concrete", 17, "yards", 200, "material", "571 cubic feet"),
       ]),
-      group("Foundation", "Slab", [
-        item("Foundation", "Gravel", 30, "cubic yards", 25, "material"),
-        item("Foundation", "Vapor barrier", 1, "roll", 173.9, "material", "10 ft by 100 ft 14 mil"),
-        item("Foundation", "Vapor barrier tape", 3, "rolls", 12.88, "material"),
-        item("Foundation", "Rebar mesh", 40, "sheets", 19.98, "material"),
-        item("Foundation", "Finishing Labor & pump", 1, "day", 2500, "material"),
-        item("Foundation", "Concrete", 12, "yards", 200, "material"),
+      group("Site Work & Foundation", "Slab", [
+        item("Site Work & Foundation", "Gravel", 30, "cubic yards", 25, "material"),
+        item("Site Work & Foundation", "Vapor barrier", 1, "roll", 173.9, "material", "10 ft by 100 ft 14 mil"),
+        item("Site Work & Foundation", "Vapor barrier tape", 3, "rolls", 12.88, "material"),
+        item("Site Work & Foundation", "Rebar mesh", 40, "sheets", 19.98, "material"),
+        item("Site Work & Foundation", "Finishing Labor & pump", 1, "day", 2500, "material"),
+        item("Site Work & Foundation", "Concrete", 12, "yards", 200, "material"),
       ]),
-      manual("Foundation", "Foundation material buffer", 0, 2499.72, "material", "Keeps starter detail tied to original $25,000 material budget."),
+      manual("Site Work & Foundation", "Foundation material buffer", 0, 2499.72, "material", "Keeps starter detail tied to original $25,000 material budget."),
     ]),
-    row("Foundation", "Lally Columns", "Ourselves", 0, 300, "Estimated", "Low", "Based on BFS Quote"),
-    row("Foundation", "Foundation Finish", "Ourselves", 1000, 1000, "Estimated", "Medium", "Need to review this"),
+    row("Site Work & Foundation", "Lally Columns", "Ourselves", 0, 300, "Estimated", "Low", "Based on BFS Quote"),
+    row("Site Work & Foundation", "Foundation Finish", "Ourselves", 1000, 1000, "Estimated", "Medium", "Need to review this"),
 
-    row("Shell", "Framing", "BPI", 16530, 15400, "Quoted", "Low", "Based on BFS and BPI Quote"),
-    row("Shell", "Decking and Railings", "Supplies", 0, 2000, "Estimated", "Medium", "Need to confirm Home Depot pricing"),
-    row("Shell", "Roofing", "BPI", 1380, 3500, "Quoted", "Low", "Based on BFS and BPI Quote"),
-    row("Shell", "Siding", "BPI", 3980, 5000, "Quoted", "Low", "Based on BFS and BPI Quote"),
-    row("Shell", "Gutters?", "BPI?", 1000, 1000, "Placeholder", "Medium", "This is not included in BPI Quote"),
-    row("Shell", "Windows (9)", "BPI", 0, 4000, "Estimated", "Medium", "Windows part of BPI Quote. Ready for individual window quote detail."),
-    row("Shell", "Doors", "BPI", 0, 1000, "Estimated", "Low", "Doors part of BPI Quote - includes doors and hardware"),
+    row("Framing", "Framing", "BPI", 16530, 15400, "Quoted", "Low", "Based on BFS and BPI Quote"),
+    row("Framing", "Decking and Railings", "Supplies", 0, 2000, "Estimated", "Medium", "Need to confirm Home Depot pricing"),
+    row("Framing", "Roofing", "BPI", 1380, 3500, "Quoted", "Low", "Based on BFS and BPI Quote"),
+    row("Framing", "Siding", "BPI", 3980, 5000, "Quoted", "Low", "Based on BFS and BPI Quote"),
+    row("Framing", "Gutters?", "BPI?", 1000, 1000, "Placeholder", "Medium", "This is not included in BPI Quote"),
+    row("Framing", "Windows (9)", "BPI", 0, 4000, "Estimated", "Medium", "Windows part of BPI Quote. Ready for individual window quote detail."),
+    row("Framing", "Doors", "BPI", 0, 1000, "Estimated", "Low", "Doors part of BPI Quote - includes doors and hardware"),
 
-    row("MEP Rough-In", "Plumbing", "Scott", 15000, 5000, "Estimated", "Medium", "Need price from Scott. 5k: 1k shower, 500 water heater, 1k vanity, 1k mirror & sink, 500 extras"),
-    row("MEP Rough-In", "Electrical", "Raven", 20000, 1000, "Estimated", "Medium", "Need price from Raven. 1k is misc"),
-    row("MEP Rough-In", "HVAC", "Scott?", 10000, 5000, "Placeholder", "Medium"),
-    row("MEP Rough-In", "Air exchange", "?", 1000, 1000, "Placeholder", "High"),
+    row("MEP", "Plumbing", "Scott", 15000, 5000, "Estimated", "Medium", "Need price from Scott. 5k: 1k shower, 500 water heater, 1k vanity, 1k mirror & sink, 500 extras"),
+    row("MEP", "Electrical", "Raven", 20000, 1000, "Estimated", "Medium", "Need price from Raven. 1k is misc"),
+    row("MEP", "HVAC", "Scott?", 10000, 5000, "Placeholder", "Medium"),
+    row("MEP", "Air exchange", "?", 1000, 1000, "Placeholder", "High"),
 
-    row("Interior", "Insulation", "RDP Insulation", 6000, 0, "Quoted"),
-    row("Interior", "Drywall", "Wesley", 6000, 1000, "Quoted"),
-    row("Interior", "Flooring", "Floor guy", 4000, 3600, "Estimated", "Medium"),
-    row("Interior", "Interior Doors", "", 2000, 0, "Placeholder", "High"),
-    row("Interior", "Finish Carpentry", "Wesley", 12000, 4000, "Estimated"),
-    row("Interior", "Kitchen", "Supplies", 0, 12000, "Estimated", "Medium"),
-    row("Interior", "Paint", "Wesley", 8000, 840, "Estimated"),
-    row("Interior", "Punch List", "David & Yosef", 5000, 0, "Estimated"),
+    row("Finish Work", "Insulation", "RDP Insulation", 6000, 0, "Quoted"),
+    row("Finish Work", "Drywall", "Wesley", 6000, 1000, "Quoted"),
+    row("Finish Work", "Flooring", "Floor guy", 4000, 3600, "Estimated", "Medium"),
+    row("Finish Work", "Interior Doors", "", 2000, 0, "Placeholder", "High"),
+    row("Finish Work", "Finish Carpentry", "Wesley", 12000, 4000, "Estimated"),
+    row("Finish Work", "Kitchen", "Supplies", 0, 12000, "Estimated", "Medium"),
+    row("Finish Work", "Paint", "Wesley", 8000, 840, "Estimated"),
+    row("Finish Work", "Punch List", "David & Yosef", 5000, 0, "Estimated"),
 
-    row("General Conditions", "Dumpster", "Rental", 0, 3000, "Estimated"),
-    row("General Conditions", "Toilet", "Rental", 0, 1000, "Estimated"),
+    row("Site Work & Foundation", "Dumpster", "Rental", 0, 3000, "Estimated"),
+    row("Site Work & Foundation", "Toilet", "Rental", 0, 1000, "Estimated"),
   ],
 };
 
@@ -236,13 +248,31 @@ function loadState() {
 
 function revive(nextState) {
   const starter = deepCopy(starterState);
+  const rows = ensurePreconstructionRows(normalizePhases(nextState.rows?.length ? nextState.rows : starter.rows));
   return {
     ...starter,
     ...nextState,
-    rows: nextState.rows?.length ? nextState.rows : starter.rows,
+    rows,
     hiddenColumns: nextState.hiddenColumns || [],
     expanded: nextState.expanded || {},
   };
+}
+
+function normalizePhases(rows) {
+  return rows.map((node) => ({
+    ...node,
+    phase: phaseMap[node.phase] || node.phase,
+    children: normalizePhases(node.children || []),
+  }));
+}
+
+function ensurePreconstructionRows(rows) {
+  if (rows.some((node) => node.phase === "Preconstruction")) return rows;
+  return [
+    row("Preconstruction", "Design / Engineering", "", 0, 0, "Placeholder", "High", "Add design, engineering, survey, and permitting costs here."),
+    row("Preconstruction", "Permits and Fees", "", 0, 0, "Placeholder", "High", "Track town, utility, and application fees here."),
+    ...rows,
+  ];
 }
 
 function saveState() {
