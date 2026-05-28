@@ -13,6 +13,14 @@ const phaseMap = {
 };
 
 const phaseOrder = ["Site Work & Foundation", "Framing", "MEP", "Finish Work"];
+const excavationAndSepticScopes = new Set([
+  "Foundation Dig",
+  "Electric Trench",
+  "Water Line Trench",
+  "Septic",
+  "Landscape",
+  "Foundation Penetration",
+]);
 
 function uid() {
   if (globalThis.crypto?.randomUUID) return globalThis.crypto.randomUUID();
@@ -243,25 +251,38 @@ function manual(phase, scope, labor, material, costType = "split", notes = "") {
 
 function loadState() {
   const saved = localStorage.getItem(STORAGE_KEY);
-  if (!saved) return { ...deepCopy(starterState), rows: groupPhaseRows(starterState.rows) };
+  if (!saved) return starterBudget();
   try {
     return revive(JSON.parse(saved));
   } catch {
-    return { ...deepCopy(starterState), rows: groupPhaseRows(starterState.rows) };
+    return starterBudget();
   }
+}
+
+function starterBudget() {
+  const starter = deepCopy(starterState);
+  const organized = organizeExcavationAndSeptic(groupPhaseRows(starter.rows));
+  return {
+    ...starter,
+    rows: organized.rows,
+    expanded: organized.groupId ? { [organized.phaseId]: true, [organized.groupId]: true } : {},
+  };
 }
 
 function revive(nextState) {
   const starter = deepCopy(starterState);
-  const rows = groupPhaseRows(normalizePhases(nextState.rows?.length ? nextState.rows : starter.rows));
+  const organized = organizeExcavationAndSeptic(groupPhaseRows(normalizePhases(nextState.rows?.length ? nextState.rows : starter.rows)));
   const projectName = nextState.projectName === "7 Jennifer Sub & Cost Planner" ? starter.projectName : nextState.projectName;
+  const expanded = nextState.expanded || {};
+  if (organized.phaseId) expanded[organized.phaseId] = true;
+  if (organized.groupId) expanded[organized.groupId] = true;
   return {
     ...starter,
     ...nextState,
     projectName,
-    rows,
+    rows: organized.rows,
     hiddenColumns: nextState.hiddenColumns || [],
-    expanded: nextState.expanded || {},
+    expanded,
   };
 }
 
@@ -291,6 +312,36 @@ function groupPhaseRows(rows) {
       cleanRows.filter((node) => node.phase === phase).map(splitCostDetails),
     ),
   );
+}
+
+function organizeExcavationAndSeptic(rows) {
+  const siteRoot = rows.find((node) => node.scope === "Site Work & Foundation");
+  if (!siteRoot) return { rows, phaseId: null, groupId: null };
+
+  let excavationGroup = siteRoot.children?.find((node) => node.scope === "Excavation & Septic");
+  if (!excavationGroup) {
+    excavationGroup = group("Site Work & Foundation", "Excavation & Septic", []);
+    siteRoot.children = siteRoot.children || [];
+    siteRoot.children.unshift(excavationGroup);
+  }
+
+  const moved = [];
+  siteRoot.children = pullExcavationRows(siteRoot.children, excavationGroup.id, moved);
+  excavationGroup.children = [...moved, ...(excavationGroup.children || [])];
+  updatePhase(excavationGroup, "Site Work & Foundation");
+  return { rows, phaseId: siteRoot.id, groupId: excavationGroup.id };
+}
+
+function pullExcavationRows(rows, excavationGroupId, moved) {
+  return rows.filter((node) => {
+    if (node.id === excavationGroupId) return true;
+    if (excavationAndSepticScopes.has(node.scope)) {
+      moved.push(node);
+      return false;
+    }
+    node.children = pullExcavationRows(node.children || [], excavationGroupId, moved);
+    return true;
+  });
 }
 
 function splitCostDetails(node) {
