@@ -1,4 +1,4 @@
-const STORAGE_KEY = "ema-budget-builder-v6";
+const STORAGE_KEY = "ema-budget-builder-v7";
 const TEMPLATE_KEY = "ema-budget-templates-v1";
 const AUTH_KEY = "ema-budget-auth-v1";
 const PASSWORD_HASH = "1f486ca655a0e21976283fa390b88097259ba393cd7cd6145c20cdd3986b97af";
@@ -283,9 +283,29 @@ function groupPhaseRows(rows) {
       "Estimated",
       "Low",
       "",
-      cleanRows.filter((node) => node.phase === phase),
+      cleanRows.filter((node) => node.phase === phase).map(splitCostDetails),
     ),
   );
+}
+
+function splitCostDetails(node) {
+  const details = [];
+  if (Number(node.labor || 0) > 0) {
+    details.push(manual(node.phase, "Labor", Number(node.labor || 0), 0, "labor", node.sub ? `Sub / vendor: ${node.sub}` : ""));
+  }
+
+  if (node.children?.length) {
+    details.push(...node.children.map(splitCostDetails));
+  } else if (Number(node.material || 0) > 0) {
+    details.push(manual(node.phase, "Material", 0, Number(node.material || 0), "material"));
+  }
+
+  return {
+    ...node,
+    labor: 0,
+    material: 0,
+    children: details,
+  };
 }
 
 function saveState() {
