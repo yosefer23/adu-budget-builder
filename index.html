@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="robots" content="noindex, nofollow" />
     <title>Eastern Mass ADU Budget</title>
-    <link rel="stylesheet" href="styles.css?v=12" />
+    <link rel="stylesheet" href="styles.css?v=13" />
   </head>
   <body>
     <section id="passwordGate" class="password-gate" aria-label="Budget sign in">
@@ -47,6 +47,7 @@
         </div>
         <div class="control-group control-actions">
           <button type="button" id="addTopRow">Add Row</button>
+          <button type="button" id="addTopGroup">Add Group</button>
         </div>
         <div class="control-group grow">
           <label>Columns</label>
@@ -90,6 +91,10 @@
               <option>MEP</option>
               <option>Finish Work</option>
             </select>
+          </label>
+          <label>
+            Nest Under
+            <select name="parentId"></select>
           </label>
           <label>
             Trade / Scope
@@ -162,6 +167,6 @@
       </form>
     </dialog>
 
-    <script src="app.js?v=16"></script>
+    <script src="app.js?v=17"></script>
   </body>
 </html>

@@ -190,7 +190,9 @@ h1 {
 }
 
 .control-actions {
+  flex-direction: row;
   justify-content: end;
+  align-items: end;
 }
 
 .control-actions button {
@@ -583,6 +585,7 @@ menu {
 
   .control-actions button {
     width: 100%;
+    flex: 1;
   }
 
   .control-group.grow {

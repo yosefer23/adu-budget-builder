@@ -144,6 +144,7 @@ const els = {
   projectName: document.getElementById("projectName"),
   contractValue: document.getElementById("contractValue"),
   addTopRow: document.getElementById("addTopRow"),
+  addTopGroup: document.getElementById("addTopGroup"),
   totalCost: document.getElementById("totalCost"),
   contractPrice: document.getElementById("contractPrice"),
   profit: document.getElementById("profit"),
@@ -384,6 +385,41 @@ function findNode(id, rows = state.rows, parent = null) {
   return null;
 }
 
+function isPhaseRoot(node) {
+  return phaseOrder.includes(node.scope) && state.rows.some((row) => row.id === node.id);
+}
+
+function containsNode(root, id) {
+  if (!root?.children?.length) return false;
+  return root.children.some((child) => child.id === id || containsNode(child, id));
+}
+
+function updatePhase(node, phase) {
+  node.phase = phase;
+  (node.children || []).forEach((child) => updatePhase(child, phase));
+}
+
+function parentOptions(activeId) {
+  const active = activeId ? findNode(activeId)?.node : null;
+  const options = [];
+
+  function walk(rows, depth = 0, path = []) {
+    rows.forEach((node) => {
+      if (!active || (node.id !== active.id && !containsNode(active, node.id))) {
+        options.push({
+          id: node.id,
+          label: [...path, node.scope].filter(Boolean).join(" / "),
+          depth,
+        });
+      }
+      walk(node.children || [], depth + 1, [...path, node.scope]);
+    });
+  }
+
+  walk(state.rows);
+  return options;
+}
+
 function filterAllows(node, totals) {
   const mode = els.viewFilter.value;
   if (mode === "all") return true;
@@ -592,6 +628,7 @@ function openEditor(id) {
   if (!found) return;
   const { node } = found;
   const form = els.form;
+  renderParentOptions(found);
   form.phase.value = node.phase || "";
   form.scope.value = node.scope || "";
   form.sub.value = node.sub || "";
@@ -608,14 +645,38 @@ function openEditor(id) {
   els.dialog.showModal();
 }
 
+function renderParentOptions(found) {
+  const select = els.form.elements.parentId;
+  select.innerHTML = "";
+  const { node, parent } = found;
+  const lockedRoot = isPhaseRoot(node);
+  parentOptions(node.id).forEach((option) => {
+    const item = document.createElement("option");
+    item.value = option.id;
+    item.textContent = `${"  ".repeat(Math.min(option.depth, 4))}${option.label}`;
+    if (parent?.id === option.id) item.selected = true;
+    select.append(item);
+  });
+  select.disabled = lockedRoot;
+}
+
+function selectParentForPhase() {
+  const parentSelect = els.form.elements.parentId;
+  if (parentSelect.disabled) return;
+  const phase = els.form.elements.phase.value;
+  const phaseRoot = state.rows.find((row) => row.scope === phase);
+  if (phaseRoot) parentSelect.value = phaseRoot.id;
+}
+
 function saveEditor(event) {
   event.preventDefault();
   const found = findNode(activeId);
   if (!found) return;
   const { node } = found;
   const data = new FormData(els.form);
-  const oldPhase = node.phase;
-  const nextPhase = data.get("phase").trim();
+  const nextParentId = data.get("parentId");
+  const nextParent = nextParentId ? findNode(nextParentId)?.node : null;
+  const nextPhase = nextParent ? nextParent.phase : data.get("phase").trim();
   node.phase = nextPhase;
   node.scope = data.get("scope").trim();
   node.sub = data.get("sub").trim();
@@ -628,23 +689,25 @@ function saveEditor(event) {
   node.labor = Number(data.get("labor") || 0);
   node.material = Number(data.get("material") || 0);
   node.notes = data.get("notes").trim();
-  moveToPhaseIfNeeded(found, oldPhase, nextPhase);
+  updatePhase(node, nextPhase);
+  moveToParentIfNeeded(found, nextParentId, nextPhase);
   els.dialog.close();
   render();
 }
 
-function moveToPhaseIfNeeded(found, oldPhase, nextPhase) {
+function moveToParentIfNeeded(found, nextParentId, nextPhase) {
   const { node, parent, siblings } = found;
-  if (oldPhase === nextPhase) return;
-  if (!nextPhase || parent?.scope === nextPhase || node.scope === nextPhase) return;
+  if (isPhaseRoot(node)) return;
   const phaseRoot = state.rows.find((row) => row.scope === nextPhase);
-  if (!phaseRoot) return;
+  const nextParent = nextParentId ? findNode(nextParentId)?.node : phaseRoot;
+  if (!nextParent || parent?.id === nextParent.id) return;
   const currentIndex = siblings.findIndex((row) => row.id === node.id);
   if (currentIndex < 0) return;
   siblings.splice(currentIndex, 1);
-  phaseRoot.children = phaseRoot.children || [];
-  phaseRoot.children.push(node);
-  state.expanded[phaseRoot.id] = true;
+  nextParent.children = nextParent.children || [];
+  nextParent.children.push(node);
+  state.expanded[nextParent.id] = true;
+  if (phaseRoot) state.expanded[phaseRoot.id] = true;
 }
 
 function addChild(parentId, kind) {
@@ -677,13 +740,12 @@ function addChild(parentId, kind) {
   openEditor(child.id);
 }
 
-function addTopRow() {
-  const phaseRoot = state.rows.find((row) => phaseOrder.includes(row.scope)) || state.rows[0];
-  if (!phaseRoot) return;
-  const child = {
+function newEditableNode(phase, scope, kind = "item") {
+  if (kind === "group") return group(phase, scope, []);
+  return {
     id: uid(),
-    phase: phaseRoot.scope,
-    scope: "New row",
+    phase,
+    scope,
     sub: "",
     labor: 0,
     material: 0,
@@ -696,6 +758,12 @@ function addTopRow() {
     unitCost: null,
     children: [],
   };
+}
+
+function addTopRow(kind = "item") {
+  const phaseRoot = state.rows.find((row) => phaseOrder.includes(row.scope)) || state.rows[0];
+  if (!phaseRoot) return;
+  const child = newEditableNode(phaseRoot.scope, kind === "group" ? "New group" : "New row", kind);
   phaseRoot.children = phaseRoot.children || [];
   phaseRoot.children.push(child);
   state.expanded[phaseRoot.id] = true;
@@ -770,8 +838,10 @@ els.contractValue.addEventListener("input", () => {
 });
 
 els.viewFilter.addEventListener("change", render);
-els.addTopRow.addEventListener("click", addTopRow);
+els.addTopRow.addEventListener("click", () => addTopRow("item"));
+els.addTopGroup.addEventListener("click", () => addTopRow("group"));
 els.form.addEventListener("submit", saveEditor);
+els.form.elements.phase.addEventListener("change", selectParentForPhase);
 document.getElementById("closeDialog").addEventListener("click", () => els.dialog.close());
 document.getElementById("cancelEdit").addEventListener("click", () => els.dialog.close());
 document.getElementById("deleteRow").addEventListener("click", deleteActive);
