@@ -8,6 +8,11 @@
   --band: #f4f6f1;
   --accent: #2f6f5e;
   --accent-2: #c86f42;
+  --labor: #2f579e;
+  --labor-bg: #f3f8ff;
+  --material: #a86422;
+  --material-bg: #fff8ec;
+  --total-bg: #f2f7f3;
   --warn: #b98214;
   --danger: #b6372d;
   --shadow: 0 10px 28px rgba(20, 34, 25, 0.08);
@@ -326,6 +331,38 @@ h1 {
   border-top: 2px solid var(--line-strong);
 }
 
+.budget-row[data-cost-kind="labor"] {
+  background: var(--labor-bg);
+  box-shadow: inset 4px 0 0 var(--labor);
+}
+
+.budget-row[data-cost-kind="material"] {
+  background: var(--material-bg);
+  box-shadow: inset 4px 0 0 var(--material);
+}
+
+.budget-row[data-cost-kind="total"] {
+  background: var(--total-bg);
+  box-shadow: inset 4px 0 0 var(--accent);
+}
+
+.budget-row[data-cost-kind="mixed"] {
+  background: #faf8f2;
+  box-shadow: inset 4px 0 0 var(--accent-2);
+}
+
+.budget-row[data-cost-kind="labor"] .money {
+  color: var(--labor);
+}
+
+.budget-row[data-cost-kind="material"] .money {
+  color: var(--material);
+}
+
+.budget-row[data-cost-kind="total"] .money {
+  color: var(--accent);
+}
+
 .cell {
   display: flex;
   align-items: center;
@@ -563,6 +600,26 @@ menu {
   .budget-row.group {
     background: #fbfcfa;
     font-weight: 800;
+  }
+
+  .budget-row[data-cost-kind="labor"] {
+    background: var(--labor-bg);
+    box-shadow: inset 3px 0 0 var(--labor);
+  }
+
+  .budget-row[data-cost-kind="material"] {
+    background: var(--material-bg);
+    box-shadow: inset 3px 0 0 var(--material);
+  }
+
+  .budget-row[data-cost-kind="total"] {
+    background: var(--total-bg);
+    box-shadow: inset 3px 0 0 var(--accent);
+  }
+
+  .budget-row[data-cost-kind="mixed"] {
+    background: #faf8f2;
+    box-shadow: inset 3px 0 0 var(--accent-2);
   }
 
   .cell {

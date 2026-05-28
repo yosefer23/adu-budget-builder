@@ -439,6 +439,7 @@ function renderRows() {
     const show = visible && filterAllows(node, totals);
     const rowEl = document.createElement("div");
     rowEl.className = `budget-row ${hasChildren ? "group" : ""} ${lastPhase !== node.phase && depth === 0 ? "phase-start" : ""}`;
+    rowEl.dataset.costKind = costKind(node, totals, hasChildren);
     if (!show) rowEl.classList.add("hidden");
     rowEl.dataset.id = node.id;
     if (depth === 0) lastPhase = node.phase;
@@ -457,6 +458,17 @@ function renderRows() {
     );
     els.rows.append(rowEl);
   });
+}
+
+function costKind(node, totals, hasChildren) {
+  const label = `${node.scope} ${node.sub}`.toLowerCase();
+  if (label.includes("labor")) return "labor";
+  if (label.includes("material")) return "material";
+  if (hasChildren) return "total";
+  if (totals.labor > 0 && totals.material === 0) return "labor";
+  if (totals.material > 0 && totals.labor === 0) return "material";
+  if (totals.labor > 0 && totals.material > 0) return "mixed";
+  return "empty";
 }
 
 function cell(keyAndClass, content) {
