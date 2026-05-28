@@ -397,13 +397,14 @@ h1 {
 .chevron {
   display: inline-grid;
   place-items: center;
-  flex: 0 0 26px;
-  width: 26px;
-  height: 26px;
+  flex: 0 0 20px;
+  width: 20px;
+  height: 20px;
   border: 1px solid #c7d6cf;
   border-radius: 999px;
   background: #f7fbf8;
   color: var(--accent);
+  font-size: 0.78rem;
   font-weight: 900;
   line-height: 1;
 }
@@ -669,12 +670,12 @@ menu {
   }
 
   .chevron {
-    flex-basis: 24px;
-    width: 24px;
-    height: 24px;
+    flex-basis: 18px;
+    width: 18px;
+    height: 18px;
     border-color: #d3ddd7;
     background: #f9fbf8;
-    font-size: 0.95rem;
+    font-size: 0.7rem;
   }
 
   .chevron.empty {
