@@ -363,11 +363,17 @@ h1 {
   flex: 0 0 26px;
   width: 26px;
   height: 26px;
-  border: 1px solid var(--line);
-  border-radius: 6px;
-  background: #fff;
-  color: var(--muted);
+  border: 1px solid #c7d6cf;
+  border-radius: 999px;
+  background: #f7fbf8;
+  color: var(--accent);
   font-weight: 900;
+  line-height: 1;
+}
+
+.chevron:hover {
+  border-color: var(--accent);
+  background: #edf4f1;
 }
 
 .chevron.empty {
@@ -609,7 +615,9 @@ menu {
     flex-basis: 24px;
     width: 24px;
     height: 24px;
-    background: transparent;
+    border-color: #d3ddd7;
+    background: #f9fbf8;
+    font-size: 0.95rem;
   }
 
   .chevron.empty {

@@ -1,4 +1,4 @@
-const STORAGE_KEY = "ema-budget-builder-v7";
+const STORAGE_KEY = "ema-budget-builder-v8";
 const TEMPLATE_KEY = "ema-budget-templates-v1";
 const AUTH_KEY = "ema-budget-auth-v1";
 const PASSWORD_HASH = "1f486ca655a0e21976283fa390b88097259ba393cd7cd6145c20cdd3986b97af";
@@ -289,15 +289,23 @@ function groupPhaseRows(rows) {
 }
 
 function splitCostDetails(node) {
+  const labor = Number(node.labor || 0);
+  const material = Number(node.material || 0);
+  const hasDetails = Boolean(node.children?.length);
+  const hasLabor = labor > 0;
+  const hasMaterial = material > 0 || hasDetails;
+
+  if (!hasDetails && !(hasLabor && material > 0)) return node;
+
   const details = [];
-  if (Number(node.labor || 0) > 0) {
-    details.push(manual(node.phase, "Labor", Number(node.labor || 0), 0, "labor", node.sub ? `Sub / vendor: ${node.sub}` : ""));
+  if (hasLabor) {
+    details.push(manual(node.phase, "Labor", labor, 0, "labor", node.sub ? `Sub / vendor: ${node.sub}` : ""));
   }
 
-  if (node.children?.length) {
-    details.push(...node.children.map(splitCostDetails));
-  } else if (Number(node.material || 0) > 0) {
-    details.push(manual(node.phase, "Material", 0, Number(node.material || 0), "material"));
+  if (hasDetails) {
+    details.push(row(node.phase, "Material", "", 0, material, node.status, node.risk, "", node.children.map(splitCostDetails)));
+  } else if (material > 0) {
+    details.push(manual(node.phase, "Material", 0, material, "material"));
   }
 
   return {
