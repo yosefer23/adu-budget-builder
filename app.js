@@ -138,6 +138,7 @@ const els = {
   passwordForm: document.getElementById("passwordForm"),
   passwordInput: document.getElementById("passwordInput"),
   passwordError: document.getElementById("passwordError"),
+  headerProject: document.getElementById("headerProject"),
   rows: document.getElementById("budgetRows"),
   header: document.getElementById("tableHeader"),
   toggles: document.getElementById("columnToggles"),
@@ -147,6 +148,9 @@ const els = {
   totalCost: document.getElementById("totalCost"),
   contractPrice: document.getElementById("contractPrice"),
   profit: document.getElementById("profit"),
+  grossMargin: document.getElementById("grossMargin"),
+  laborCost: document.getElementById("laborCost"),
+  materialCost: document.getElementById("materialCost"),
   viewFilter: document.getElementById("viewFilter"),
   dialog: document.getElementById("editorDialog"),
   form: document.getElementById("editorForm"),
@@ -401,6 +405,7 @@ function render() {
   renderRows();
   renderSummary();
   els.projectName.value = state.projectName;
+  els.headerProject.textContent = state.projectName;
   els.contractValue.value = state.contractValue || "";
 }
 
@@ -452,7 +457,7 @@ function renderRows() {
 
     rowEl.append(
       cell("scope", scopeContent(node, depth, hasChildren, open)),
-      cell("phase", node.phase),
+      cell("phase", phaseBadge(node.phase)),
       cell("sub", node.sub),
       cell("labor money", money(totals.labor)),
       cell("material money", money(totals.material)),
@@ -486,6 +491,7 @@ function cell(keyAndClass, content) {
   if (state.hiddenColumns.includes(key)) div.classList.add("is-hidden-col");
   if (typeof content === "string") div.textContent = content;
   else div.append(content);
+  if (["phase", "status", "risk"].includes(key)) div.classList.add("badge-cell");
   return div;
 }
 
@@ -527,6 +533,13 @@ function statusPill(status) {
   const span = document.createElement("span");
   span.className = `status ${status}`;
   span.textContent = status || "Estimated";
+  return span;
+}
+
+function phaseBadge(phase) {
+  const span = document.createElement("span");
+  span.className = "phase-badge";
+  span.textContent = phase || "Unassigned";
   return span;
 }
 
@@ -578,11 +591,16 @@ function renderSummary() {
   const total = totals.labor + totals.material;
   const contract = Number(state.contractValue || 0);
   const profit = contract - total;
+  const margin = contract ? profit / contract : 0;
 
   els.totalCost.textContent = money(total);
   els.contractPrice.textContent = money(contract);
   els.profit.textContent = money(profit);
+  els.grossMargin.textContent = percent(margin);
+  els.laborCost.textContent = money(totals.labor);
+  els.materialCost.textContent = money(totals.material);
   els.profit.style.color = profit >= 0 ? "var(--accent)" : "var(--danger)";
+  els.grossMargin.style.color = profit >= 0 ? "var(--accent)" : "var(--danger)";
 }
 
 function openEditor(id) {
@@ -759,6 +777,7 @@ function resetDemo() {
 
 els.projectName.addEventListener("input", () => {
   state.projectName = els.projectName.value;
+  els.headerProject.textContent = state.projectName;
   saveState();
 });
 
