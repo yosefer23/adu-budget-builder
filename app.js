@@ -155,6 +155,7 @@ const els = {
   contractValue: document.getElementById("contractValue"),
   addTopRow: document.getElementById("addTopRow"),
   addTopGroup: document.getElementById("addTopGroup"),
+  saveStatus: document.getElementById("saveStatus"),
   totalCost: document.getElementById("totalCost"),
   contractPrice: document.getElementById("contractPrice"),
   profit: document.getElementById("profit"),
@@ -394,7 +395,19 @@ function splitCostDetails(node) {
 }
 
 function saveState() {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    showSaveStatus("Saved");
+    return true;
+  } catch {
+    showSaveStatus("Could not save");
+    return false;
+  }
+}
+
+function showSaveStatus(message) {
+  if (!els.saveStatus) return;
+  els.saveStatus.textContent = message;
 }
 
 function money(value) {
@@ -765,6 +778,7 @@ function saveEditor(event) {
   moveToParentIfNeeded(found, nextParentId, nextPhase);
   els.dialog.close();
   render();
+  saveState();
 }
 
 function moveToParentIfNeeded(found, nextParentId, nextPhase) {
@@ -914,12 +928,20 @@ els.addTopRow.addEventListener("click", () => addTopRow("item"));
 els.addTopGroup.addEventListener("click", () => addTopRow("group"));
 els.form.addEventListener("submit", saveEditor);
 els.form.elements.phase.addEventListener("change", selectParentForPhase);
+document.getElementById("saveRow").addEventListener("click", (event) => {
+  event.preventDefault();
+  saveEditor(event);
+});
 document.getElementById("closeDialog").addEventListener("click", () => els.dialog.close());
 document.getElementById("cancelEdit").addEventListener("click", () => els.dialog.close());
 document.getElementById("deleteRow").addEventListener("click", deleteActive);
 document.getElementById("addGroup").addEventListener("click", () => addChild(activeId, "group"));
 document.getElementById("addItem").addEventListener("click", () => addChild(activeId, "item"));
 els.passwordForm.addEventListener("submit", checkPassword);
+window.addEventListener("pagehide", saveState);
+document.addEventListener("visibilitychange", () => {
+  if (document.visibilityState === "hidden") saveState();
+});
 if (sessionStorage.getItem(AUTH_KEY) === "ok") unlockBudget();
 
 render();
