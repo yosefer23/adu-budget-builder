@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="robots" content="noindex, nofollow" />
     <title>Eastern Mass ADU Budget</title>
-    <link rel="stylesheet" href="styles.css?v=4" />
+    <link rel="stylesheet" href="styles.css?v=5" />
   </head>
   <body>
     <section id="passwordGate" class="password-gate" aria-label="Budget sign in">
@@ -22,43 +22,10 @@
     </section>
 
     <header class="topbar">
-      <div>
-        <p class="eyebrow">Eastern Mass ADU</p>
-        <h1>Fixed-Price Budget Builder</h1>
-      </div>
-      <div class="toolbar">
-        <button id="expandAll" type="button" title="Expand all rows">Expand</button>
-        <button id="collapseAll" type="button" title="Collapse all rows">Collapse</button>
-        <button id="copyBudget" type="button" title="Copy this whole budget as a new project">Copy Budget</button>
-        <button id="saveTemplate" type="button" title="Save this project as a reusable template">Save Template</button>
-        <button id="resetDemo" type="button" class="ghost" title="Reset to the starter budget">Reset</button>
-      </div>
+      <h1>7 Jennifer budget</h1>
     </header>
 
     <main>
-      <section class="summary-grid" aria-label="Project summary">
-        <label class="metric editable">
-          <span>Contract Value</span>
-          <input id="contractValue" type="number" min="0" step="500" value="322500" />
-        </label>
-        <div class="metric">
-          <span>Total Cost</span>
-          <strong id="totalCost">$258,530</strong>
-        </div>
-        <div class="metric">
-          <span>Projected Profit</span>
-          <strong id="profit">$63,970</strong>
-        </div>
-        <div class="metric">
-          <span>Margin</span>
-          <strong id="margin">19.8%</strong>
-        </div>
-        <div class="metric">
-          <span>25% Target Gap</span>
-          <strong id="targetGap">-$16,655</strong>
-        </div>
-      </section>
-
       <section class="controls-band" aria-label="Budget controls">
         <div class="control-group">
           <label for="projectName">Project</label>
@@ -83,6 +50,21 @@
       <section class="budget-shell" aria-label="Budget table">
         <div class="table-header" id="tableHeader"></div>
         <div id="budgetRows" class="rows"></div>
+      </section>
+
+      <section class="bottom-summary" aria-label="Budget summary">
+        <div>
+          <span>Total Cost</span>
+          <strong id="totalCost">$0</strong>
+        </div>
+        <div>
+          <span>Contract Price</span>
+          <strong id="contractPrice">$0</strong>
+        </div>
+        <div>
+          <span>Profit</span>
+          <strong id="profit">$0</strong>
+        </div>
       </section>
     </main>
 
@@ -168,6 +150,6 @@
       </form>
     </dialog>
 
-    <script src="app.js?v=9"></script>
+    <script src="app.js?v=10"></script>
   </body>
 </html>

@@ -1,6 +1,5 @@
 const STORAGE_KEY = "ema-budget-builder-v6";
 const TEMPLATE_KEY = "ema-budget-templates-v1";
-const TARGET_MARGIN = 0.25;
 const AUTH_KEY = "ema-budget-auth-v1";
 const PASSWORD_HASH = "1f486ca655a0e21976283fa390b88097259ba393cd7cd6145c20cdd3986b97af";
 
@@ -142,12 +141,10 @@ const els = {
   rows: document.getElementById("budgetRows"),
   header: document.getElementById("tableHeader"),
   toggles: document.getElementById("columnToggles"),
-  contractValue: document.getElementById("contractValue"),
   projectName: document.getElementById("projectName"),
   totalCost: document.getElementById("totalCost"),
+  contractPrice: document.getElementById("contractPrice"),
   profit: document.getElementById("profit"),
-  margin: document.getElementById("margin"),
-  targetGap: document.getElementById("targetGap"),
   viewFilter: document.getElementById("viewFilter"),
   dialog: document.getElementById("editorDialog"),
   form: document.getElementById("editorForm"),
@@ -371,7 +368,6 @@ function render() {
   renderToggles();
   renderRows();
   renderSummary();
-  els.contractValue.value = state.contractValue;
   els.projectName.value = state.projectName;
 }
 
@@ -530,16 +526,11 @@ function renderSummary() {
   const total = totals.labor + totals.material;
   const contract = Number(state.contractValue || 0);
   const profit = contract - total;
-  const margin = contract ? profit / contract : 0;
-  const targetProfit = contract * TARGET_MARGIN;
-  const targetGap = profit - targetProfit;
 
   els.totalCost.textContent = money(total);
+  els.contractPrice.textContent = money(contract);
   els.profit.textContent = money(profit);
-  els.margin.textContent = percent(margin);
-  els.targetGap.textContent = money(targetGap);
-  els.targetGap.style.color = targetGap >= 0 ? "var(--accent)" : "var(--danger)";
-  els.margin.style.color = margin >= TARGET_MARGIN ? "var(--accent)" : "var(--danger)";
+  els.profit.style.color = profit >= 0 ? "var(--accent)" : "var(--danger)";
 }
 
 function openEditor(id) {
@@ -671,12 +662,6 @@ function resetDemo() {
   render();
 }
 
-els.contractValue.addEventListener("input", () => {
-  state.contractValue = Number(els.contractValue.value || 0);
-  renderSummary();
-  saveState();
-});
-
 els.projectName.addEventListener("input", () => {
   state.projectName = els.projectName.value;
   saveState();
@@ -689,11 +674,6 @@ document.getElementById("cancelEdit").addEventListener("click", () => els.dialog
 document.getElementById("deleteRow").addEventListener("click", deleteActive);
 document.getElementById("addGroup").addEventListener("click", () => addChild(activeId, "group"));
 document.getElementById("addItem").addEventListener("click", () => addChild(activeId, "item"));
-document.getElementById("expandAll").addEventListener("click", () => setAllExpanded(true));
-document.getElementById("collapseAll").addEventListener("click", () => setAllExpanded(false));
-document.getElementById("copyBudget").addEventListener("click", copyBudget);
-document.getElementById("saveTemplate").addEventListener("click", saveTemplate);
-document.getElementById("resetDemo").addEventListener("click", resetDemo);
 els.passwordForm.addEventListener("submit", checkPassword);
 if (sessionStorage.getItem(AUTH_KEY) === "ok") unlockBudget();
 
