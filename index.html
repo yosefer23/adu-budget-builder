@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="robots" content="noindex, nofollow" />
     <title>Eastern Mass ADU Budget</title>
-    <link rel="stylesheet" href="styles.css?v=9" />
+    <link rel="stylesheet" href="styles.css?v=10" />
   </head>
   <body>
     <section id="passwordGate" class="password-gate" aria-label="Budget sign in">
@@ -29,7 +29,11 @@
       <section class="controls-band" aria-label="Budget controls">
         <div class="control-group">
           <label for="projectName">Project</label>
-          <input id="projectName" type="text" value="7 Jennifer Sub & Cost Planner" />
+          <input id="projectName" type="text" value="7 Jennifer budget" />
+        </div>
+        <div class="control-group">
+          <label for="contractValue">Contract Price</label>
+          <input id="contractValue" type="number" step="0.01" min="0" />
         </div>
         <div class="control-group">
           <label for="viewFilter">View</label>
@@ -40,6 +44,9 @@
             <option value="materials">Rows with materials</option>
             <option value="labor">Rows with labor</option>
           </select>
+        </div>
+        <div class="control-group control-actions">
+          <button type="button" id="addTopRow">Add Row</button>
         </div>
         <div class="control-group grow">
           <label>Columns</label>
@@ -77,7 +84,12 @@
         <div class="form-grid">
           <label>
             Phase
-            <input name="phase" type="text" />
+            <select name="phase">
+              <option>Site Work & Foundation</option>
+              <option>Framing</option>
+              <option>MEP</option>
+              <option>Finish Work</option>
+            </select>
           </label>
           <label>
             Trade / Scope
@@ -150,6 +162,6 @@
       </form>
     </dialog>
 
-    <script src="app.js?v=13"></script>
+    <script src="app.js?v=14"></script>
   </body>
 </html>

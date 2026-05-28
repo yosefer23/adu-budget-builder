@@ -47,7 +47,7 @@ const statusBySub = {
 };
 
 const starterState = {
-  projectName: "7 Jennifer Sub & Cost Planner",
+  projectName: "7 Jennifer budget",
   contractValue: 332350,
   hiddenColumns: [],
   expanded: {},
@@ -142,6 +142,8 @@ const els = {
   header: document.getElementById("tableHeader"),
   toggles: document.getElementById("columnToggles"),
   projectName: document.getElementById("projectName"),
+  contractValue: document.getElementById("contractValue"),
+  addTopRow: document.getElementById("addTopRow"),
   totalCost: document.getElementById("totalCost"),
   contractPrice: document.getElementById("contractPrice"),
   profit: document.getElementById("profit"),
@@ -251,9 +253,11 @@ function loadState() {
 function revive(nextState) {
   const starter = deepCopy(starterState);
   const rows = groupPhaseRows(normalizePhases(nextState.rows?.length ? nextState.rows : starter.rows));
+  const projectName = nextState.projectName === "7 Jennifer Sub & Cost Planner" ? starter.projectName : nextState.projectName;
   return {
     ...starter,
     ...nextState,
+    projectName,
     rows,
     hiddenColumns: nextState.hiddenColumns || [],
     expanded: nextState.expanded || {},
@@ -397,6 +401,7 @@ function render() {
   renderRows();
   renderSummary();
   els.projectName.value = state.projectName;
+  els.contractValue.value = state.contractValue || "";
 }
 
 function renderHeader() {
@@ -442,6 +447,7 @@ function renderRows() {
     rowEl.dataset.costKind = costKind(node, totals, hasChildren);
     if (!show) rowEl.classList.add("hidden");
     rowEl.dataset.id = node.id;
+    rowEl.addEventListener("click", () => openEditor(node.id));
     if (depth === 0) lastPhase = node.phase;
 
     rowEl.append(
@@ -545,12 +551,18 @@ function actions(node) {
   edit.type = "button";
   edit.textContent = "✎";
   edit.title = "Edit row";
-  edit.addEventListener("click", () => openEditor(node.id));
+  edit.addEventListener("click", (event) => {
+    event.stopPropagation();
+    openEditor(node.id);
+  });
   const add = document.createElement("button");
   add.type = "button";
   add.textContent = "+";
   add.title = "Add detail under this row";
-  add.addEventListener("click", () => addChild(node.id, "item"));
+  add.addEventListener("click", (event) => {
+    event.stopPropagation();
+    addChild(node.id, "item");
+  });
   wrap.append(edit, add);
   return wrap;
 }
@@ -601,7 +613,9 @@ function saveEditor(event) {
   if (!found) return;
   const { node } = found;
   const data = new FormData(els.form);
-  node.phase = data.get("phase").trim();
+  const oldPhase = node.phase;
+  const nextPhase = data.get("phase").trim();
+  node.phase = nextPhase;
   node.scope = data.get("scope").trim();
   node.sub = data.get("sub").trim();
   node.status = data.get("status");
@@ -613,8 +627,23 @@ function saveEditor(event) {
   node.labor = Number(data.get("labor") || 0);
   node.material = Number(data.get("material") || 0);
   node.notes = data.get("notes").trim();
+  moveToPhaseIfNeeded(found, oldPhase, nextPhase);
   els.dialog.close();
   render();
+}
+
+function moveToPhaseIfNeeded(found, oldPhase, nextPhase) {
+  const { node, parent, siblings } = found;
+  if (oldPhase === nextPhase) return;
+  if (!nextPhase || parent?.scope === nextPhase || node.scope === nextPhase) return;
+  const phaseRoot = state.rows.find((row) => row.scope === nextPhase);
+  if (!phaseRoot) return;
+  const currentIndex = siblings.findIndex((row) => row.id === node.id);
+  if (currentIndex < 0) return;
+  siblings.splice(currentIndex, 1);
+  phaseRoot.children = phaseRoot.children || [];
+  phaseRoot.children.push(node);
+  state.expanded[phaseRoot.id] = true;
 }
 
 function addChild(parentId, kind) {
@@ -643,6 +672,32 @@ function addChild(parentId, kind) {
   node.children = node.children || [];
   node.children.push(child);
   state.expanded[node.id] = true;
+  render();
+  openEditor(child.id);
+}
+
+function addTopRow() {
+  const phaseRoot = state.rows.find((row) => phaseOrder.includes(row.scope)) || state.rows[0];
+  if (!phaseRoot) return;
+  const child = {
+    id: uid(),
+    phase: phaseRoot.scope,
+    scope: "New row",
+    sub: "",
+    labor: 0,
+    material: 0,
+    status: "Estimated",
+    risk: "Low",
+    notes: "",
+    costType: "split",
+    qty: null,
+    unit: "",
+    unitCost: null,
+    children: [],
+  };
+  phaseRoot.children = phaseRoot.children || [];
+  phaseRoot.children.push(child);
+  state.expanded[phaseRoot.id] = true;
   render();
   openEditor(child.id);
 }
@@ -707,7 +762,14 @@ els.projectName.addEventListener("input", () => {
   saveState();
 });
 
+els.contractValue.addEventListener("input", () => {
+  state.contractValue = Number(els.contractValue.value || 0);
+  renderSummary();
+  saveState();
+});
+
 els.viewFilter.addEventListener("change", render);
+els.addTopRow.addEventListener("click", addTopRow);
 els.form.addEventListener("submit", saveEditor);
 document.getElementById("closeDialog").addEventListener("click", () => els.dialog.close());
 document.getElementById("cancelEdit").addEventListener("click", () => els.dialog.close());
