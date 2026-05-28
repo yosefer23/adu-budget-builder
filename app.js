@@ -21,6 +21,8 @@ const excavationAndSepticScopes = new Set([
   "Landscape",
   "Foundation Penetration",
 ]);
+const foundationScopes = new Set(["Lally Columns", "Foundation Finish"]);
+const siteMaintenanceScopes = new Set(["Dumpster", "Toilet"]);
 
 function uid() {
   if (globalThis.crypto?.randomUUID) return globalThis.crypto.randomUUID();
@@ -261,21 +263,20 @@ function loadState() {
 
 function starterBudget() {
   const starter = deepCopy(starterState);
-  const organized = organizeExcavationAndSeptic(groupPhaseRows(starter.rows));
+  const organized = organizeSiteWorkSubcategories(groupPhaseRows(starter.rows));
   return {
     ...starter,
     rows: organized.rows,
-    expanded: organized.groupId ? { [organized.phaseId]: true, [organized.groupId]: true } : {},
+    expanded: expandedSiteWorkGroups(organized),
   };
 }
 
 function revive(nextState) {
   const starter = deepCopy(starterState);
-  const organized = organizeExcavationAndSeptic(groupPhaseRows(normalizePhases(nextState.rows?.length ? nextState.rows : starter.rows)));
+  const organized = organizeSiteWorkSubcategories(groupPhaseRows(normalizePhases(nextState.rows?.length ? nextState.rows : starter.rows)));
   const projectName = nextState.projectName === "7 Jennifer Sub & Cost Planner" ? starter.projectName : nextState.projectName;
   const expanded = nextState.expanded || {};
-  if (organized.phaseId) expanded[organized.phaseId] = true;
-  if (organized.groupId) expanded[organized.groupId] = true;
+  Object.assign(expanded, expandedSiteWorkGroups(organized));
   return {
     ...starter,
     ...nextState,
@@ -314,32 +315,52 @@ function groupPhaseRows(rows) {
   );
 }
 
-function organizeExcavationAndSeptic(rows) {
-  const siteRoot = rows.find((node) => node.scope === "Site Work & Foundation");
-  if (!siteRoot) return { rows, phaseId: null, groupId: null };
-
-  let excavationGroup = siteRoot.children?.find((node) => node.scope === "Excavation & Septic");
-  if (!excavationGroup) {
-    excavationGroup = group("Site Work & Foundation", "Excavation & Septic", []);
-    siteRoot.children = siteRoot.children || [];
-    siteRoot.children.unshift(excavationGroup);
-  }
-
-  const moved = [];
-  siteRoot.children = pullExcavationRows(siteRoot.children, excavationGroup.id, moved);
-  excavationGroup.children = [...moved, ...(excavationGroup.children || [])];
-  updatePhase(excavationGroup, "Site Work & Foundation");
-  return { rows, phaseId: siteRoot.id, groupId: excavationGroup.id };
+function expandedSiteWorkGroups(organized) {
+  return [organized.phaseId, ...(organized.groupIds || [])].filter(Boolean).reduce((expanded, id) => {
+    expanded[id] = true;
+    return expanded;
+  }, {});
 }
 
-function pullExcavationRows(rows, excavationGroupId, moved) {
+function organizeSiteWorkSubcategories(rows) {
+  const siteRoot = rows.find((node) => node.scope === "Site Work & Foundation");
+  if (!siteRoot) return { rows, phaseId: null, groupIds: [] };
+
+  const excavationGroup = ensureSiteGroup(siteRoot, "Excavation & Septic", 0);
+  const foundationGroup = ensureSiteGroup(siteRoot, "Foundation", 1);
+  const maintenanceGroup = ensureSiteGroup(siteRoot, "Site Maintenance", 2);
+
+  moveMatchingRows(siteRoot, excavationGroup, excavationAndSepticScopes);
+  moveMatchingRows(siteRoot, foundationGroup, foundationScopes);
+  moveMatchingRows(siteRoot, maintenanceGroup, siteMaintenanceScopes);
+  updatePhase(siteRoot, "Site Work & Foundation");
+  return { rows, phaseId: siteRoot.id, groupIds: [excavationGroup.id, foundationGroup.id, maintenanceGroup.id] };
+}
+
+function ensureSiteGroup(siteRoot, scope, index) {
+  siteRoot.children = siteRoot.children || [];
+  let target = siteRoot.children.find((node) => node.scope === scope);
+  if (!target) {
+    target = group("Site Work & Foundation", scope, []);
+    siteRoot.children.splice(index, 0, target);
+  }
+  return target;
+}
+
+function moveMatchingRows(siteRoot, targetGroup, scopes) {
+  const moved = [];
+  siteRoot.children = pullMatchingRows(siteRoot.children || [], targetGroup.id, scopes, moved);
+  targetGroup.children = [...moved, ...(targetGroup.children || [])];
+}
+
+function pullMatchingRows(rows, targetGroupId, scopes, moved) {
   return rows.filter((node) => {
-    if (node.id === excavationGroupId) return true;
-    if (excavationAndSepticScopes.has(node.scope)) {
+    if (node.id === targetGroupId) return true;
+    if (scopes.has(node.scope)) {
       moved.push(node);
       return false;
     }
-    node.children = pullExcavationRows(node.children || [], excavationGroupId, moved);
+    node.children = pullMatchingRows(node.children || [], targetGroupId, scopes, moved);
     return true;
   });
 }
