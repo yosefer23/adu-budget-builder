@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="robots" content="noindex, nofollow" />
     <title>Eastern Mass ADU Budget</title>
-    <link rel="stylesheet" href="styles.css?v=11" />
+    <link rel="stylesheet" href="styles.css?v=10" />
   </head>
   <body>
     <section id="passwordGate" class="password-gate" aria-label="Budget sign in">
@@ -22,47 +22,10 @@
     </section>
 
     <header class="topbar">
-      <div>
-        <p class="eyebrow">Eastern Mass ADU</p>
-        <h1>ADU Budget Builder</h1>
-        <p id="headerProject" class="header-project">7 Jennifer budget</p>
-      </div>
+      <h1>7 Jennifer budget</h1>
     </header>
 
     <main>
-      <section class="bottom-summary" aria-label="Budget summary">
-        <div class="summary-card primary">
-          <span>Contract Price</span>
-          <strong id="contractPrice">$0</strong>
-          <small>Target revenue</small>
-        </div>
-        <div class="summary-card">
-          <span>Total Cost</span>
-          <strong id="totalCost">$0</strong>
-          <small>Labor plus material</small>
-        </div>
-        <div class="summary-card">
-          <span>Gross Profit</span>
-          <strong id="profit">$0</strong>
-          <small>Contract minus cost</small>
-        </div>
-        <div class="summary-card">
-          <span>Gross Margin</span>
-          <strong id="grossMargin">0%</strong>
-          <small>Profit as percent</small>
-        </div>
-        <div class="summary-card">
-          <span>Labor Cost</span>
-          <strong id="laborCost">$0</strong>
-          <small>All labor rows</small>
-        </div>
-        <div class="summary-card">
-          <span>Material Cost</span>
-          <strong id="materialCost">$0</strong>
-          <small>All material rows</small>
-        </div>
-      </section>
-
       <section class="controls-band" aria-label="Budget controls">
         <div class="control-group">
           <label for="projectName">Project</label>
@@ -94,6 +57,21 @@
       <section class="budget-shell" aria-label="Budget table">
         <div class="table-header" id="tableHeader"></div>
         <div id="budgetRows" class="rows"></div>
+      </section>
+
+      <section class="bottom-summary" aria-label="Budget summary">
+        <div>
+          <span>Total Cost</span>
+          <strong id="totalCost">$0</strong>
+        </div>
+        <div>
+          <span>Contract Price</span>
+          <strong id="contractPrice">$0</strong>
+        </div>
+        <div>
+          <span>Profit</span>
+          <strong id="profit">$0</strong>
+        </div>
       </section>
     </main>
 
@@ -184,6 +162,6 @@
       </form>
     </dialog>
 
-    <script src="app.js?v=15"></script>
+    <script src="app.js?v=14"></script>
   </body>
 </html>
