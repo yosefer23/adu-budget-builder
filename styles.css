@@ -599,8 +599,9 @@ menu {
   }
 
   .budget-shell {
-    border: 0;
-    background: transparent;
+    border: 1px solid var(--line);
+    border-radius: 0;
+    background: var(--surface);
     box-shadow: none;
   }
 
@@ -609,18 +610,15 @@ menu {
   }
 
   .rows {
-    display: grid;
-    gap: 10px;
+    display: block;
     overflow-x: visible;
   }
 
   .budget-row {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: minmax(0, 1fr) auto;
     min-width: 0;
-    border: 1px solid var(--line);
-    border-radius: 8px;
-    box-shadow: var(--shadow);
-    overflow: hidden;
+    border-top: 1px solid var(--line);
+    background: var(--surface);
   }
 
   .budget-row.phase-start {
@@ -628,99 +626,77 @@ menu {
   }
 
   .budget-row.group {
-    background: var(--surface);
+    background: #fbfcfa;
+    font-weight: 800;
   }
 
   .cell {
-    min-height: 38px;
-    align-items: flex-start;
-    justify-content: space-between;
-    gap: 8px;
-    padding: 8px 11px;
+    display: none;
+    min-height: 42px;
+    padding: 9px 10px;
     border-right: 0;
-    border-top: 1px solid #edf0ed;
-    text-align: right;
   }
 
   .cell::before {
-    content: attr(data-label);
-    flex: 0 0 auto;
-    color: var(--muted);
-    font-size: 0.72rem;
-    font-weight: 900;
-    line-height: 1.2;
-    text-align: left;
-    text-transform: uppercase;
+    display: none;
   }
 
   .cell[data-col="scope"] {
-    grid-column: 1 / -1;
-    align-items: flex-start;
+    display: flex;
+    grid-column: 1;
+    align-items: center;
     justify-content: flex-start;
-    padding: 13px 11px;
-    border-top: 0;
+    min-width: 0;
     text-align: left;
-  }
-
-  .cell[data-col="scope"]::before {
-    display: none;
-  }
-
-  .cell[data-col="labor"],
-  .cell[data-col="material"] {
-    min-height: 52px;
-    flex-direction: column;
-    justify-content: center;
-    text-align: left;
-  }
-
-  .cell[data-col="labor"]::before,
-  .cell[data-col="material"]::before {
-    margin-bottom: 2px;
   }
 
   .cell[data-col="total"] {
-    grid-column: 1 / -1;
-    min-height: 54px;
-    align-items: center;
-    background: #f4f8f5;
-    font-size: 1.08rem;
-    font-weight: 900;
-  }
-
-  .cell[data-col="status"],
-  .cell[data-col="risk"] {
-    align-items: center;
-  }
-
-  .cell[data-col="notes"] {
-    grid-column: 1 / -1;
-    flex-direction: column;
-    align-items: flex-start;
-    text-align: left;
-  }
-
-  .cell[data-col="notes"]:empty {
-    display: none;
-  }
-
-  .cell[data-col="actions"] {
-    grid-column: 1 / -1;
+    display: flex;
+    grid-column: 2;
     align-items: center;
     justify-content: flex-end;
-    background: #fafbf8;
+    min-width: 86px;
+    color: var(--ink);
+    background: transparent;
+    font-size: 0.95rem;
+    font-weight: 900;
+    white-space: nowrap;
   }
 
   .money {
-    justify-content: flex-start;
+    justify-content: flex-end;
   }
 
   .indent {
-    width: min(var(--indent), 44px);
+    width: min(var(--indent), 34px);
+  }
+
+  .scope-cell {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .chevron {
+    flex-basis: 24px;
+    width: 24px;
+    height: 24px;
+    background: transparent;
+  }
+
+  .chevron.empty {
+    display: none;
   }
 
   .row-title strong {
-    font-size: 1rem;
+    display: block;
+    max-width: 100%;
+    font-size: 0.95rem;
+    line-height: 1.25;
+    overflow-wrap: anywhere;
+  }
+
+  .row-title small {
+    display: none;
   }
 
   .actions {
