@@ -421,6 +421,7 @@ h1 {
   font-size: 0.68rem;
   font-weight: 900;
   line-height: 1;
+  padding: 0;
 }
 
 .chevron:hover {
@@ -611,6 +612,39 @@ menu {
     background: var(--surface);
   }
 
+  .budget-row[data-depth="0"] {
+    min-height: 78px;
+  }
+
+  .budget-row[data-depth="0"] .cell[data-col="scope"] {
+    padding-left: 14px;
+  }
+
+  .budget-row[data-depth="0"] .row-title strong {
+    font-size: 1.05rem;
+    font-weight: 900;
+  }
+
+  .budget-row[data-depth="0"] .cell[data-col="total"] {
+    min-width: 112px;
+    padding-right: 14px;
+    font-size: 1.08rem;
+  }
+
+  .budget-row:not([data-depth="0"]) {
+    background: #fff;
+  }
+
+  .budget-row:not([data-depth="0"]) .row-title strong {
+    font-size: 0.92rem;
+    font-weight: 800;
+  }
+
+  .budget-row:not([data-depth="0"]) .cell[data-col="total"] {
+    min-width: 92px;
+    font-size: 0.94rem;
+  }
+
   .budget-row.phase-start {
     border-top: 1px solid var(--line);
   }
@@ -638,6 +672,15 @@ menu {
   .budget-row[data-cost-kind="mixed"] {
     background: #faf8f2;
     box-shadow: inset 3px 0 0 var(--accent-2);
+  }
+
+  .budget-row:not([data-depth="0"])[data-cost-kind="total"] {
+    background: #fff;
+    box-shadow: inset 3px 0 0 #cfdad4;
+  }
+
+  .budget-row:not([data-depth="0"])[data-cost-kind="total"] .money {
+    color: var(--ink);
   }
 
   .cell {
@@ -678,7 +721,7 @@ menu {
   }
 
   .indent {
-    width: min(var(--indent), 34px);
+    width: min(var(--indent), 58px);
   }
 
   .scope-cell {
@@ -692,10 +735,11 @@ menu {
     height: 12px;
     background: transparent;
     font-size: 0.62rem;
+    padding: 0;
   }
 
   .chevron.empty {
-    display: none;
+    visibility: hidden;
   }
 
   .row-title strong {

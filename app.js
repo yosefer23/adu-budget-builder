@@ -445,6 +445,7 @@ function renderRows() {
     const rowEl = document.createElement("div");
     rowEl.className = `budget-row ${hasChildren ? "group" : ""} ${lastPhase !== node.phase && depth === 0 ? "phase-start" : ""}`;
     rowEl.dataset.costKind = costKind(node, totals, hasChildren);
+    rowEl.dataset.depth = depth;
     if (!show) rowEl.classList.add("hidden");
     rowEl.dataset.id = node.id;
     rowEl.addEventListener("click", () => openEditor(node.id));
