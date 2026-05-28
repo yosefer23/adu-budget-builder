@@ -38,3 +38,13 @@ Then open the address shown in the terminal.
 - Add material estimate templates.
 - Add quote version history.
 - Add actuals/job accounting once the budget workflow feels right.
+
+## Cloud sync setup
+
+The app can be moved from browser-only storage to Supabase-backed project storage.
+
+1. Create a Supabase project.
+2. Run `supabase-schema.sql` in the Supabase SQL editor.
+3. Copy `cloud-config.example.js` to `cloud-config.js`.
+4. Fill in the Supabase project URL and public anon key.
+5. Keep Row Level Security enabled. Do not use the service-role key in the browser.
