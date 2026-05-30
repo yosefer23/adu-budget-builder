@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="robots" content="noindex, nofollow" />
     <title>Eastern Mass ADU Budget</title>
-    <link rel="stylesheet" href="styles.css?v=13" />
+    <link rel="stylesheet" href="styles.css?v=14" />
   </head>
   <body>
     <section id="passwordGate" class="password-gate" aria-label="Budget sign in">
@@ -26,6 +26,31 @@
     </header>
 
     <main>
+      <section class="cloud-band" aria-label="Cloud sync">
+        <div class="cloud-auth" id="cloudSignedOut">
+          <div class="control-group">
+            <label for="cloudEmail">Email</label>
+            <input id="cloudEmail" type="email" autocomplete="email" />
+          </div>
+          <div class="control-group">
+            <label for="cloudPassword">Password</label>
+            <input id="cloudPassword" type="password" autocomplete="current-password" />
+          </div>
+          <button type="button" id="cloudSignIn">Sign In</button>
+          <button type="button" id="cloudSignUp">Create Login</button>
+        </div>
+        <div class="cloud-auth is-hidden" id="cloudSignedIn">
+          <div class="control-group">
+            <label for="projectSelect">Cloud Project</label>
+            <select id="projectSelect"></select>
+          </div>
+          <button type="button" id="copyCloudProject">Copy Current</button>
+          <button type="button" id="syncNow">Sync Now</button>
+          <button type="button" id="cloudSignOut">Sign Out</button>
+        </div>
+        <p id="cloudStatus" class="cloud-status">Local only</p>
+      </section>
+
       <section class="controls-band" aria-label="Budget controls">
         <div class="control-group">
           <label for="projectName">Project</label>
@@ -168,6 +193,8 @@
       </form>
     </dialog>
 
-    <script src="app.js?v=20"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="cloud-config.js"></script>
+    <script src="app.js?v=21"></script>
   </body>
 </html>

@@ -175,6 +175,42 @@ h1 {
   background: var(--band);
 }
 
+.cloud-band {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 12px;
+  align-items: end;
+  padding: 14px;
+  margin-bottom: 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fff;
+  box-shadow: var(--shadow);
+}
+
+.cloud-auth {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: end;
+}
+
+.cloud-auth .control-group {
+  min-width: 180px;
+}
+
+.cloud-status {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.82rem;
+  font-weight: 800;
+  text-align: right;
+}
+
+.is-hidden {
+  display: none !important;
+}
+
 .control-group {
   display: flex;
   flex-direction: column;
@@ -590,6 +626,26 @@ menu {
     gap: 10px;
     padding: 11px;
     overflow: hidden;
+  }
+
+  .cloud-band {
+    grid-template-columns: 1fr;
+    padding: 11px;
+  }
+
+  .cloud-auth {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .cloud-auth .control-group,
+  .cloud-auth button {
+    min-width: 0;
+    width: 100%;
+  }
+
+  .cloud-status {
+    text-align: left;
   }
 
   .control-actions button {

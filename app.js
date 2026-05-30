@@ -1,7 +1,18 @@
 const STORAGE_KEY = "ema-budget-builder-v8";
 const TEMPLATE_KEY = "ema-budget-templates-v1";
 const AUTH_KEY = "ema-budget-auth-v1";
+const CLOUD_PROJECT_KEY = "ema-budget-cloud-project-v1";
+const CLOUD_SYNC_DELAY = 650;
 const PASSWORD_HASH = "1f486ca655a0e21976283fa390b88097259ba393cd7cd6145c20cdd3986b97af";
+const cloudConfig = window.ADU_BUDGET_CLOUD || {};
+const cloudState = {
+  client: null,
+  user: null,
+  projects: [],
+  activeProjectId: localStorage.getItem(CLOUD_PROJECT_KEY) || "",
+  syncTimer: null,
+  applyingRemote: false,
+};
 
 const phaseMap = {
   Sitework: "Site Work & Foundation",
@@ -156,6 +167,17 @@ const els = {
   addTopRow: document.getElementById("addTopRow"),
   addTopGroup: document.getElementById("addTopGroup"),
   saveStatus: document.getElementById("saveStatus"),
+  cloudSignedOut: document.getElementById("cloudSignedOut"),
+  cloudSignedIn: document.getElementById("cloudSignedIn"),
+  cloudEmail: document.getElementById("cloudEmail"),
+  cloudPassword: document.getElementById("cloudPassword"),
+  cloudSignIn: document.getElementById("cloudSignIn"),
+  cloudSignUp: document.getElementById("cloudSignUp"),
+  cloudSignOut: document.getElementById("cloudSignOut"),
+  projectSelect: document.getElementById("projectSelect"),
+  copyCloudProject: document.getElementById("copyCloudProject"),
+  syncNow: document.getElementById("syncNow"),
+  cloudStatus: document.getElementById("cloudStatus"),
   totalCost: document.getElementById("totalCost"),
   contractPrice: document.getElementById("contractPrice"),
   profit: document.getElementById("profit"),
@@ -398,6 +420,7 @@ function saveState() {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
     showSaveStatus("Saved");
+    queueCloudSave();
     return true;
   } catch {
     showSaveStatus("Could not save");
@@ -408,6 +431,222 @@ function saveState() {
 function showSaveStatus(message) {
   if (!els.saveStatus) return;
   els.saveStatus.textContent = message;
+}
+
+function showCloudStatus(message) {
+  if (!els.cloudStatus) return;
+  els.cloudStatus.textContent = message;
+}
+
+function cloudReady() {
+  return Boolean(cloudState.client && cloudState.user);
+}
+
+function projectPayload() {
+  return {
+    name: state.projectName || "Untitled budget",
+    contract_value: Number(state.contractValue || 0),
+    rows: state.rows,
+    hidden_columns: state.hiddenColumns || [],
+    expanded: state.expanded || {},
+  };
+}
+
+function projectState(record) {
+  return {
+    projectName: record.name,
+    contractValue: Number(record.contract_value || 0),
+    rows: record.rows || [],
+    hiddenColumns: record.hidden_columns || [],
+    expanded: record.expanded || {},
+  };
+}
+
+function queueCloudSave() {
+  if (!cloudReady() || !cloudState.activeProjectId || cloudState.applyingRemote) return;
+  clearTimeout(cloudState.syncTimer);
+  showCloudStatus("Cloud sync pending");
+  cloudState.syncTimer = setTimeout(saveCloudProject, CLOUD_SYNC_DELAY);
+}
+
+async function saveCloudProject() {
+  if (!cloudReady() || !cloudState.activeProjectId) return;
+  showCloudStatus("Syncing...");
+  const { data, error } = await cloudState.client
+    .from("budget_projects")
+    .update(projectPayload())
+    .eq("id", cloudState.activeProjectId)
+    .select()
+    .single();
+  if (error) {
+    showCloudStatus(`Cloud save failed: ${error.message}`);
+    return;
+  }
+  upsertCloudProject(data);
+  showCloudStatus("Cloud saved");
+}
+
+function upsertCloudProject(project) {
+  const index = cloudState.projects.findIndex((item) => item.id === project.id);
+  if (index >= 0) cloudState.projects[index] = project;
+  else cloudState.projects.push(project);
+  renderProjectSelect();
+}
+
+function renderCloudAuth() {
+  const signedIn = Boolean(cloudState.user);
+  els.cloudSignedOut.classList.toggle("is-hidden", signedIn);
+  els.cloudSignedIn.classList.toggle("is-hidden", !signedIn);
+  if (!cloudState.client) showCloudStatus("Cloud not configured");
+  else if (!signedIn) showCloudStatus("Sign in for cloud sync");
+}
+
+function renderProjectSelect() {
+  if (!els.projectSelect) return;
+  els.projectSelect.innerHTML = "";
+  cloudState.projects.forEach((project) => {
+    const option = document.createElement("option");
+    option.value = project.id;
+    option.textContent = project.name;
+    option.selected = project.id === cloudState.activeProjectId;
+    els.projectSelect.append(option);
+  });
+}
+
+async function loadCloudProjects() {
+  if (!cloudReady()) return;
+  showCloudStatus("Loading cloud projects...");
+  const { data, error } = await cloudState.client
+    .from("budget_projects")
+    .select("*")
+    .order("updated_at", { ascending: false });
+  if (error) {
+    showCloudStatus(`Cloud load failed: ${error.message}`);
+    return;
+  }
+  cloudState.projects = data || [];
+  if (!cloudState.projects.length) {
+    await createCloudProject(state.projectName || "7 Jennifer budget", state);
+    return;
+  }
+  const selected = cloudState.projects.find((project) => project.id === cloudState.activeProjectId) || cloudState.projects[0];
+  applyCloudProject(selected);
+  showCloudStatus("Cloud loaded");
+}
+
+async function createCloudProject(name, sourceState = state) {
+  if (!cloudReady()) return null;
+  showCloudStatus("Creating cloud project...");
+  const payload = {
+    user_id: cloudState.user.id,
+    name,
+    contract_value: Number(sourceState.contractValue || 0),
+    rows: assignNewIds(sourceState.rows || []),
+    hidden_columns: sourceState.hiddenColumns || [],
+    expanded: {},
+  };
+  const { data, error } = await cloudState.client.from("budget_projects").insert(payload).select().single();
+  if (error) {
+    showCloudStatus(`Cloud create failed: ${error.message}`);
+    return null;
+  }
+  upsertCloudProject(data);
+  applyCloudProject(data);
+  showCloudStatus("Cloud project created");
+  return data;
+}
+
+function applyCloudProject(project) {
+  cloudState.applyingRemote = true;
+  cloudState.activeProjectId = project.id;
+  localStorage.setItem(CLOUD_PROJECT_KEY, project.id);
+  state = revive(projectState(project));
+  renderProjectSelect();
+  render();
+  cloudState.applyingRemote = false;
+}
+
+async function signInCloud() {
+  if (!cloudState.client) return;
+  const email = els.cloudEmail.value.trim();
+  const password = els.cloudPassword.value;
+  if (!email || !password) {
+    showCloudStatus("Enter email and password");
+    return;
+  }
+  showCloudStatus("Signing in...");
+  const { data, error } = await cloudState.client.auth.signInWithPassword({ email, password });
+  if (error) {
+    showCloudStatus(`Sign in failed: ${error.message}`);
+    return;
+  }
+  cloudState.user = data.user;
+  renderCloudAuth();
+  await loadCloudProjects();
+}
+
+async function signUpCloud() {
+  if (!cloudState.client) return;
+  const email = els.cloudEmail.value.trim();
+  const password = els.cloudPassword.value;
+  if (!email || !password) {
+    showCloudStatus("Enter email and password");
+    return;
+  }
+  showCloudStatus("Creating login...");
+  const { data, error } = await cloudState.client.auth.signUp({ email, password });
+  if (error) {
+    showCloudStatus(`Create login failed: ${error.message}`);
+    return;
+  }
+  cloudState.user = data.user;
+  renderCloudAuth();
+  if (cloudState.user) await loadCloudProjects();
+  else showCloudStatus("Check your email to confirm login");
+}
+
+async function signOutCloud() {
+  if (!cloudState.client) return;
+  await saveCloudProject();
+  await cloudState.client.auth.signOut();
+  cloudState.user = null;
+  cloudState.projects = [];
+  cloudState.activeProjectId = "";
+  localStorage.removeItem(CLOUD_PROJECT_KEY);
+  renderProjectSelect();
+  renderCloudAuth();
+}
+
+async function switchCloudProject() {
+  if (!cloudReady()) return;
+  await saveCloudProject();
+  const selected = cloudState.projects.find((project) => project.id === els.projectSelect.value);
+  if (selected) applyCloudProject(selected);
+}
+
+async function copyCloudProject() {
+  if (!cloudReady()) return;
+  await saveCloudProject();
+  const name = prompt("Name for the copied budget", `${state.projectName} Copy`);
+  if (!name) return;
+  await createCloudProject(name.trim(), state);
+}
+
+async function initCloud() {
+  if (!cloudConfig.supabaseUrl || !cloudConfig.supabaseAnonKey || !window.supabase?.createClient) {
+    renderCloudAuth();
+    return;
+  }
+  cloudState.client = window.supabase.createClient(cloudConfig.supabaseUrl, cloudConfig.supabaseAnonKey);
+  const { data } = await cloudState.client.auth.getSession();
+  cloudState.user = data.session?.user || null;
+  cloudState.client.auth.onAuthStateChange((_event, session) => {
+    cloudState.user = session?.user || null;
+    renderCloudAuth();
+    if (cloudState.user) loadCloudProjects();
+  });
+  renderCloudAuth();
+  if (cloudState.user) await loadCloudProjects();
 }
 
 function money(value) {
@@ -926,6 +1165,12 @@ els.contractValue.addEventListener("input", () => {
 els.viewFilter.addEventListener("change", render);
 els.addTopRow.addEventListener("click", () => addTopRow("item"));
 els.addTopGroup.addEventListener("click", () => addTopRow("group"));
+els.cloudSignIn.addEventListener("click", signInCloud);
+els.cloudSignUp.addEventListener("click", signUpCloud);
+els.cloudSignOut.addEventListener("click", signOutCloud);
+els.projectSelect.addEventListener("change", switchCloudProject);
+els.copyCloudProject.addEventListener("click", copyCloudProject);
+els.syncNow.addEventListener("click", saveCloudProject);
 els.form.addEventListener("submit", saveEditor);
 els.form.elements.phase.addEventListener("change", selectParentForPhase);
 document.getElementById("saveRow").addEventListener("click", (event) => {
@@ -945,3 +1190,4 @@ document.addEventListener("visibilitychange", () => {
 if (sessionStorage.getItem(AUTH_KEY) === "ok") unlockBudget();
 
 render();
+initCloud();

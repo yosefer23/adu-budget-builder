@@ -45,6 +45,5 @@ The app can be moved from browser-only storage to Supabase-backed project storag
 
 1. Create a Supabase project.
 2. Run `supabase-schema.sql` in the Supabase SQL editor.
-3. Copy `cloud-config.example.js` to `cloud-config.js`.
-4. Fill in the Supabase project URL and public anon key.
-5. Keep Row Level Security enabled. Do not use the service-role key in the browser.
+3. `cloud-config.js` contains the Supabase project URL and public publishable key for this app.
+4. Keep Row Level Security enabled. Do not use the service-role key in the browser.
