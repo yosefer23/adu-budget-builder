@@ -162,6 +162,7 @@ const els = {
   passwordError: document.getElementById("passwordError"),
   rows: document.getElementById("budgetRows"),
   header: document.getElementById("tableHeader"),
+  topTitle: document.getElementById("topTitle"),
   toggles: document.getElementById("columnToggles"),
   projectName: document.getElementById("projectName"),
   contractValue: document.getElementById("contractValue"),
@@ -175,6 +176,7 @@ const els = {
   cloudSignUp: document.getElementById("cloudSignUp"),
   cloudSignOut: document.getElementById("cloudSignOut"),
   projectSelect: document.getElementById("projectSelect"),
+  newCloudProject: document.getElementById("newCloudProject"),
   copyCloudProject: document.getElementById("copyCloudProject"),
   syncNow: document.getElementById("syncNow"),
   cloudStatus: document.getElementById("cloudStatus"),
@@ -504,7 +506,7 @@ function renderCloudAuth() {
 function renderProjectSelect() {
   if (!els.projectSelect) return;
   els.projectSelect.innerHTML = "";
-  cloudState.projects.forEach((project) => {
+  [...cloudState.projects].sort((a, b) => a.name.localeCompare(b.name)).forEach((project) => {
     const option = document.createElement("option");
     option.value = project.id;
     option.textContent = project.name;
@@ -537,12 +539,13 @@ async function loadCloudProjects() {
 async function createCloudProject(name, sourceState = state) {
   if (!cloudReady()) return null;
   showCloudStatus("Creating cloud project...");
+  const source = revive(sourceState);
   const payload = {
     user_id: cloudState.user.id,
     name,
-    contract_value: Number(sourceState.contractValue || 0),
-    rows: assignNewIds(sourceState.rows || []),
-    hidden_columns: sourceState.hiddenColumns || [],
+    contract_value: Number(source.contractValue || 0),
+    rows: assignNewIds(source.rows || []),
+    hidden_columns: source.hiddenColumns || [],
     expanded: {},
   };
   const { data, error } = await cloudState.client.from("budget_projects").insert(payload).select().single();
@@ -635,6 +638,24 @@ async function switchCloudProject() {
   await saveCloudProject();
   const selected = cloudState.projects.find((project) => project.id === els.projectSelect.value);
   if (selected) applyCloudProject(selected);
+}
+
+async function createProjectFromTemplate() {
+  const name = prompt("Name for the new project", "New ADU budget");
+  if (!name?.trim()) return;
+  const contractInput = prompt("Contract price", String(state.contractValue || starterState.contractValue || ""));
+  if (contractInput === null) return;
+  const template = starterBudget();
+  template.projectName = name.trim();
+  template.contractValue = Number(contractInput || 0);
+  if (cloudReady()) {
+    await saveCloudProject();
+    await createCloudProject(template.projectName, template);
+    return;
+  }
+  state = template;
+  render();
+  showCloudStatus("Project created locally. Unlock cloud to sync it everywhere.");
 }
 
 async function copyCloudProject() {
@@ -773,6 +794,7 @@ function render() {
   renderToggles();
   renderRows();
   renderSummary();
+  els.topTitle.textContent = state.projectName || "ADU Budget";
   els.projectName.value = state.projectName;
   els.contractValue.value = state.contractValue || "";
 }
@@ -1166,6 +1188,7 @@ function resetDemo() {
 
 els.projectName.addEventListener("input", () => {
   state.projectName = els.projectName.value;
+  els.topTitle.textContent = state.projectName || "ADU Budget";
   saveState();
 });
 
@@ -1182,6 +1205,7 @@ els.cloudSignIn.addEventListener("click", signInCloud);
 els.cloudSignUp.addEventListener("click", signUpCloud);
 els.cloudSignOut.addEventListener("click", signOutCloud);
 els.projectSelect.addEventListener("change", switchCloudProject);
+els.newCloudProject.addEventListener("click", createProjectFromTemplate);
 els.copyCloudProject.addEventListener("click", copyCloudProject);
 els.syncNow.addEventListener("click", saveCloudProject);
 els.form.addEventListener("submit", saveEditor);

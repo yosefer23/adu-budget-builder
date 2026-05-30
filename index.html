@@ -22,7 +22,7 @@
     </section>
 
     <header class="topbar">
-      <h1>7 Jennifer budget</h1>
+      <h1 id="topTitle">7 Jennifer budget</h1>
     </header>
 
     <main>
@@ -40,7 +40,8 @@
             <label for="projectSelect">Cloud Project</label>
             <select id="projectSelect"></select>
           </div>
-          <button type="button" id="copyCloudProject">Copy Current</button>
+          <button type="button" id="newCloudProject">New Project</button>
+          <button type="button" id="copyCloudProject">Duplicate</button>
           <button type="button" id="syncNow">Sync Now</button>
           <button type="button" id="cloudSignOut">Sign Out</button>
         </div>
@@ -191,6 +192,6 @@
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="cloud-config.js"></script>
-    <script src="app.js?v=23"></script>
+    <script src="app.js?v=24"></script>
   </body>
 </html>
