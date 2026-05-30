@@ -29,15 +29,11 @@
       <section class="cloud-band" aria-label="Cloud sync">
         <div class="cloud-auth" id="cloudSignedOut">
           <div class="control-group">
-            <label for="cloudEmail">Email</label>
-            <input id="cloudEmail" type="email" autocomplete="email" />
-          </div>
-          <div class="control-group">
-            <label for="cloudPassword">Password</label>
+            <label for="cloudPassword">Cloud Password</label>
             <input id="cloudPassword" type="password" autocomplete="current-password" />
           </div>
-          <button type="button" id="cloudSignIn">Sign In</button>
-          <button type="button" id="cloudSignUp">Create Login</button>
+          <button type="button" id="cloudSignIn">Unlock Cloud</button>
+          <button type="button" id="cloudSignUp">Set Password</button>
         </div>
         <div class="cloud-auth is-hidden" id="cloudSignedIn">
           <div class="control-group">
@@ -195,6 +191,6 @@
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="cloud-config.js"></script>
-    <script src="app.js?v=21"></script>
+    <script src="app.js?v=22"></script>
   </body>
 </html>

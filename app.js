@@ -3,6 +3,7 @@ const TEMPLATE_KEY = "ema-budget-templates-v1";
 const AUTH_KEY = "ema-budget-auth-v1";
 const CLOUD_PROJECT_KEY = "ema-budget-cloud-project-v1";
 const CLOUD_SYNC_DELAY = 650;
+const CLOUD_SHARED_EMAIL = "adu-budget-builder@yosefer23.github.io";
 const PASSWORD_HASH = "1f486ca655a0e21976283fa390b88097259ba393cd7cd6145c20cdd3986b97af";
 const cloudConfig = window.ADU_BUDGET_CLOUD || {};
 const cloudState = {
@@ -169,7 +170,6 @@ const els = {
   saveStatus: document.getElementById("saveStatus"),
   cloudSignedOut: document.getElementById("cloudSignedOut"),
   cloudSignedIn: document.getElementById("cloudSignedIn"),
-  cloudEmail: document.getElementById("cloudEmail"),
   cloudPassword: document.getElementById("cloudPassword"),
   cloudSignIn: document.getElementById("cloudSignIn"),
   cloudSignUp: document.getElementById("cloudSignUp"),
@@ -498,7 +498,7 @@ function renderCloudAuth() {
   els.cloudSignedOut.classList.toggle("is-hidden", signedIn);
   els.cloudSignedIn.classList.toggle("is-hidden", !signedIn);
   if (!cloudState.client) showCloudStatus("Cloud not configured");
-  else if (!signedIn) showCloudStatus("Sign in for cloud sync");
+  else if (!signedIn) showCloudStatus("Enter the shared cloud password");
 }
 
 function renderProjectSelect() {
@@ -568,18 +568,21 @@ function applyCloudProject(project) {
 
 async function signInCloud() {
   if (!cloudState.client) return;
-  const email = els.cloudEmail.value.trim();
   const password = els.cloudPassword.value;
-  if (!email || !password) {
-    showCloudStatus("Enter email and password");
+  if (!password) {
+    showCloudStatus("Enter the cloud password");
     return;
   }
-  showCloudStatus("Signing in...");
-  const { data, error } = await cloudState.client.auth.signInWithPassword({ email, password });
+  showCloudStatus("Unlocking cloud...");
+  const { data, error } = await cloudState.client.auth.signInWithPassword({
+    email: CLOUD_SHARED_EMAIL,
+    password,
+  });
   if (error) {
-    showCloudStatus(`Sign in failed: ${error.message}`);
+    showCloudStatus(`Cloud unlock failed: ${error.message}`);
     return;
   }
+  els.cloudPassword.value = "";
   cloudState.user = data.user;
   renderCloudAuth();
   await loadCloudProjects();
@@ -587,22 +590,32 @@ async function signInCloud() {
 
 async function signUpCloud() {
   if (!cloudState.client) return;
-  const email = els.cloudEmail.value.trim();
   const password = els.cloudPassword.value;
-  if (!email || !password) {
-    showCloudStatus("Enter email and password");
+  if (!password) {
+    showCloudStatus("Enter the cloud password");
     return;
   }
-  showCloudStatus("Creating login...");
-  const { data, error } = await cloudState.client.auth.signUp({ email, password });
+  if (password.length < 6) {
+    showCloudStatus("Cloud password must be at least 6 characters");
+    return;
+  }
+  showCloudStatus("Setting cloud password...");
+  const { data, error } = await cloudState.client.auth.signUp({
+    email: CLOUD_SHARED_EMAIL,
+    password,
+  });
   if (error) {
-    showCloudStatus(`Create login failed: ${error.message}`);
+    showCloudStatus(`Set password failed: ${error.message}`);
     return;
   }
-  cloudState.user = data.user;
+  els.cloudPassword.value = "";
+  if (!data.session?.user) {
+    showCloudStatus("Password set, but Supabase still needs email confirmation turned off");
+    return;
+  }
+  cloudState.user = data.session.user;
   renderCloudAuth();
-  if (cloudState.user) await loadCloudProjects();
-  else showCloudStatus("Check your email to confirm login");
+  await loadCloudProjects();
 }
 
 async function signOutCloud() {
