@@ -42,6 +42,7 @@
             <select id="projectSelect"></select>
           </div>
           <button type="button" id="newCloudProject">New Project</button>
+          <button type="button" id="editProjectDetails">Edit Details</button>
           <button type="button" id="copyCloudProject">Duplicate</button>
           <button type="button" id="syncNow">Sync Now</button>
           <button type="button" id="cloudSignOut">Sign Out</button>
@@ -195,8 +196,8 @@
       <form id="projectForm">
         <div class="dialog-head">
           <div>
-            <p class="eyebrow">New Project</p>
-            <h2>Start From Template</h2>
+            <p class="eyebrow" id="projectDialogEyebrow">New Project</p>
+            <h2 id="projectDialogTitle">Start From Template</h2>
           </div>
           <button type="button" id="closeProjectDialog" class="icon-button" aria-label="Close">×</button>
         </div>
@@ -211,7 +212,7 @@
           </label>
           <label>
             Template
-            <select name="template">
+            <select name="template" id="projectTemplate">
               <option value="standard">Eastern Mass ADU Standard</option>
             </select>
           </label>
@@ -249,13 +250,13 @@
         <menu class="dialog-actions">
           <span></span>
           <button value="cancel" type="button" id="cancelProject">Cancel</button>
-          <button type="submit">Create Project</button>
+          <button type="submit" id="saveProjectDetails">Create Project</button>
         </menu>
       </form>
     </dialog>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="cloud-config.js"></script>
-    <script src="app.js?v=25"></script>
+    <script src="app.js?v=26"></script>
   </body>
 </html>

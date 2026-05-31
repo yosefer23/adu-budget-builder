@@ -162,6 +162,7 @@ const starterState = {
 
 let state = loadState();
 let activeId = null;
+let projectDialogMode = "create";
 
 const els = {
   gate: document.getElementById("passwordGate"),
@@ -186,6 +187,7 @@ const els = {
   cloudSignOut: document.getElementById("cloudSignOut"),
   projectSelect: document.getElementById("projectSelect"),
   newCloudProject: document.getElementById("newCloudProject"),
+  editProjectDetails: document.getElementById("editProjectDetails"),
   copyCloudProject: document.getElementById("copyCloudProject"),
   syncNow: document.getElementById("syncNow"),
   cloudStatus: document.getElementById("cloudStatus"),
@@ -197,6 +199,10 @@ const els = {
   form: document.getElementById("editorForm"),
   projectDialog: document.getElementById("projectDialog"),
   projectForm: document.getElementById("projectForm"),
+  projectDialogEyebrow: document.getElementById("projectDialogEyebrow"),
+  projectDialogTitle: document.getElementById("projectDialogTitle"),
+  projectTemplate: document.getElementById("projectTemplate"),
+  saveProjectDetails: document.getElementById("saveProjectDetails"),
 };
 
 document.body.classList.toggle("is-locked", sessionStorage.getItem(AUTH_KEY) !== "ok");
@@ -667,11 +673,37 @@ async function switchCloudProject() {
 }
 
 function openProjectSetup() {
+  projectDialogMode = "create";
   const form = els.projectForm;
   form.reset();
   form.elements.projectName.value = "";
   form.elements.contractValue.value = state.contractValue || starterState.contractValue || "";
   form.elements.status.value = "Planning";
+  els.projectDialogEyebrow.textContent = "New Project";
+  els.projectDialogTitle.textContent = "Start From Template";
+  els.saveProjectDetails.textContent = "Create Project";
+  els.projectTemplate.disabled = false;
+  els.projectDialog.showModal();
+}
+
+function openProjectDetails() {
+  projectDialogMode = "edit";
+  const form = els.projectForm;
+  const meta = state.projectMeta || {};
+  form.reset();
+  form.elements.projectName.value = state.projectName || "";
+  form.elements.contractValue.value = state.contractValue || "";
+  form.elements.template.value = "standard";
+  form.elements.address.value = meta.address || "";
+  form.elements.clientName.value = meta.clientName || "";
+  form.elements.status.value = meta.status || "Planning";
+  form.elements.startDate.value = meta.startDate || "";
+  form.elements.targetFinishDate.value = meta.targetFinishDate || "";
+  form.elements.notes.value = meta.notes || "";
+  els.projectDialogEyebrow.textContent = "Project Details";
+  els.projectDialogTitle.textContent = "Edit Project Details";
+  els.saveProjectDetails.textContent = "Save Details";
+  els.projectTemplate.disabled = true;
   els.projectDialog.showModal();
 }
 
@@ -680,6 +712,23 @@ async function createProjectFromTemplate(event) {
   const form = els.projectForm;
   const name = form.elements.projectName.value.trim();
   if (!name) return;
+  if (projectDialogMode === "edit") {
+    state.projectName = name;
+    state.contractValue = Number(form.elements.contractValue.value || 0);
+    state.projectMeta = {
+      address: form.elements.address.value.trim(),
+      clientName: form.elements.clientName.value.trim(),
+      status: form.elements.status.value,
+      startDate: form.elements.startDate.value,
+      targetFinishDate: form.elements.targetFinishDate.value,
+      notes: form.elements.notes.value.trim(),
+    };
+    render();
+    await saveCloudProject();
+    els.projectDialog.close();
+    showCloudStatus(cloudReady() ? "Project details saved" : "Project details saved locally");
+    return;
+  }
   const template = starterBudget();
   template.projectName = name;
   template.contractValue = Number(form.elements.contractValue.value || 0);
@@ -1258,6 +1307,7 @@ els.cloudSignUp.addEventListener("click", signUpCloud);
 els.cloudSignOut.addEventListener("click", signOutCloud);
 els.projectSelect.addEventListener("change", switchCloudProject);
 els.newCloudProject.addEventListener("click", openProjectSetup);
+els.editProjectDetails.addEventListener("click", openProjectDetails);
 els.copyCloudProject.addEventListener("click", copyCloudProject);
 els.syncNow.addEventListener("click", saveCloudProject);
 els.form.addEventListener("submit", saveEditor);
