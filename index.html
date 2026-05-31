@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="robots" content="noindex, nofollow" />
     <title>Eastern Mass ADU Budget</title>
-    <link rel="stylesheet" href="styles.css?v=14" />
+    <link rel="stylesheet" href="styles.css?v=15" />
   </head>
   <body>
     <section id="passwordGate" class="password-gate" aria-label="Budget sign in">
@@ -23,6 +23,7 @@
 
     <header class="topbar">
       <h1 id="topTitle">7 Jennifer budget</h1>
+      <p id="topSubtitle"></p>
     </header>
 
     <main>
@@ -190,8 +191,71 @@
       </form>
     </dialog>
 
+    <dialog id="projectDialog">
+      <form id="projectForm">
+        <div class="dialog-head">
+          <div>
+            <p class="eyebrow">New Project</p>
+            <h2>Start From Template</h2>
+          </div>
+          <button type="button" id="closeProjectDialog" class="icon-button" aria-label="Close">×</button>
+        </div>
+        <div class="form-grid project-form-grid">
+          <label>
+            Project Name
+            <input name="projectName" type="text" required />
+          </label>
+          <label>
+            Contract Price
+            <input name="contractValue" type="number" step="0.01" min="0" />
+          </label>
+          <label>
+            Template
+            <select name="template">
+              <option value="standard">Eastern Mass ADU Standard</option>
+            </select>
+          </label>
+          <label>
+            Address
+            <input name="address" type="text" />
+          </label>
+          <label>
+            Client
+            <input name="clientName" type="text" />
+          </label>
+          <label>
+            Status
+            <select name="status">
+              <option>Planning</option>
+              <option>Estimating</option>
+              <option>Contracted</option>
+              <option>In Progress</option>
+              <option>Closeout</option>
+            </select>
+          </label>
+          <label>
+            Start Date
+            <input name="startDate" type="date" />
+          </label>
+          <label>
+            Target Finish
+            <input name="targetFinishDate" type="date" />
+          </label>
+          <label class="wide">
+            Notes
+            <textarea name="notes" rows="3"></textarea>
+          </label>
+        </div>
+        <menu class="dialog-actions">
+          <span></span>
+          <button value="cancel" type="button" id="cancelProject">Cancel</button>
+          <button type="submit">Create Project</button>
+        </menu>
+      </form>
+    </dialog>
+
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="cloud-config.js"></script>
-    <script src="app.js?v=24"></script>
+    <script src="app.js?v=25"></script>
   </body>
 </html>

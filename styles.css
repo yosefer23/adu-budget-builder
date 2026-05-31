@@ -144,6 +144,17 @@ main {
   background: #eef2e9;
 }
 
+.topbar p {
+  margin: 6px 0 0;
+  color: var(--muted);
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.topbar p:empty {
+  display: none;
+}
+
 .eyebrow {
   margin: 0 0 4px;
   color: var(--accent);
@@ -555,7 +566,8 @@ dialog::backdrop {
   background: rgba(18, 24, 20, 0.36);
 }
 
-#editorForm {
+#editorForm,
+#projectForm {
   padding: 18px;
 }
 
@@ -587,6 +599,10 @@ dialog::backdrop {
   grid-column: 1 / -1;
 }
 
+.project-form-grid {
+  grid-template-columns: repeat(2, 1fr);
+}
+
 menu {
   display: grid;
   grid-template-columns: auto 1fr auto auto auto auto;
@@ -594,6 +610,10 @@ menu {
   align-items: center;
   margin: 18px 0 0;
   padding: 0;
+}
+
+.dialog-actions {
+  grid-template-columns: 1fr auto auto;
 }
 
 @media (max-width: 960px) {
@@ -606,6 +626,10 @@ menu {
   }
 
   .form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .project-form-grid {
     grid-template-columns: 1fr;
   }
 }

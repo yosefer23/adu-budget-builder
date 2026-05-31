@@ -70,6 +70,14 @@ const statusBySub = {
 
 const starterState = {
   projectName: "7 Jennifer budget",
+  projectMeta: {
+    address: "",
+    clientName: "",
+    status: "Estimating",
+    startDate: "",
+    targetFinishDate: "",
+    notes: "",
+  },
   contractValue: 332350,
   hiddenColumns: [],
   expanded: {},
@@ -163,6 +171,7 @@ const els = {
   rows: document.getElementById("budgetRows"),
   header: document.getElementById("tableHeader"),
   topTitle: document.getElementById("topTitle"),
+  topSubtitle: document.getElementById("topSubtitle"),
   toggles: document.getElementById("columnToggles"),
   projectName: document.getElementById("projectName"),
   contractValue: document.getElementById("contractValue"),
@@ -186,6 +195,8 @@ const els = {
   viewFilter: document.getElementById("viewFilter"),
   dialog: document.getElementById("editorDialog"),
   form: document.getElementById("editorForm"),
+  projectDialog: document.getElementById("projectDialog"),
+  projectForm: document.getElementById("projectForm"),
 };
 
 document.body.classList.toggle("is-locked", sessionStorage.getItem(AUTH_KEY) !== "ok");
@@ -298,14 +309,22 @@ function starterBudget() {
 
 function revive(nextState) {
   const starter = deepCopy(starterState);
+  const expandedSource = nextState.expanded || {};
   const organized = organizeSiteWorkSubcategories(groupPhaseRows(normalizePhases(nextState.rows?.length ? nextState.rows : starter.rows)));
   const projectName = nextState.projectName === "7 Jennifer Sub & Cost Planner" ? starter.projectName : nextState.projectName;
-  const expanded = nextState.expanded || {};
+  const projectMeta = {
+    ...starter.projectMeta,
+    ...(expandedSource.__projectMeta || {}),
+    ...(nextState.projectMeta || {}),
+  };
+  const expanded = { ...expandedSource };
+  delete expanded.__projectMeta;
   Object.assign(expanded, expandedSiteWorkGroups(organized));
   return {
     ...starter,
     ...nextState,
     projectName,
+    projectMeta,
     rows: organized.rows,
     hiddenColumns: nextState.hiddenColumns || [],
     expanded,
@@ -450,17 +469,22 @@ function projectPayload() {
     contract_value: Number(state.contractValue || 0),
     rows: state.rows,
     hidden_columns: state.hiddenColumns || [],
-    expanded: state.expanded || {},
+    expanded: {
+      ...(state.expanded || {}),
+      __projectMeta: state.projectMeta || {},
+    },
   };
 }
 
 function projectState(record) {
+  const expanded = record.expanded || {};
   return {
     projectName: record.name,
     contractValue: Number(record.contract_value || 0),
     rows: record.rows || [],
     hiddenColumns: record.hidden_columns || [],
-    expanded: record.expanded || {},
+    expanded,
+    projectMeta: expanded.__projectMeta || {},
   };
 }
 
@@ -546,7 +570,9 @@ async function createCloudProject(name, sourceState = state) {
     contract_value: Number(source.contractValue || 0),
     rows: assignNewIds(source.rows || []),
     hidden_columns: source.hiddenColumns || [],
-    expanded: {},
+    expanded: {
+      __projectMeta: source.projectMeta || {},
+    },
   };
   const { data, error } = await cloudState.client.from("budget_projects").insert(payload).select().single();
   if (error) {
@@ -640,21 +666,40 @@ async function switchCloudProject() {
   if (selected) applyCloudProject(selected);
 }
 
-async function createProjectFromTemplate() {
-  const name = prompt("Name for the new project", "New ADU budget");
-  if (!name?.trim()) return;
-  const contractInput = prompt("Contract price", String(state.contractValue || starterState.contractValue || ""));
-  if (contractInput === null) return;
+function openProjectSetup() {
+  const form = els.projectForm;
+  form.reset();
+  form.elements.projectName.value = "";
+  form.elements.contractValue.value = state.contractValue || starterState.contractValue || "";
+  form.elements.status.value = "Planning";
+  els.projectDialog.showModal();
+}
+
+async function createProjectFromTemplate(event) {
+  event.preventDefault();
+  const form = els.projectForm;
+  const name = form.elements.projectName.value.trim();
+  if (!name) return;
   const template = starterBudget();
-  template.projectName = name.trim();
-  template.contractValue = Number(contractInput || 0);
+  template.projectName = name;
+  template.contractValue = Number(form.elements.contractValue.value || 0);
+  template.projectMeta = {
+    address: form.elements.address.value.trim(),
+    clientName: form.elements.clientName.value.trim(),
+    status: form.elements.status.value,
+    startDate: form.elements.startDate.value,
+    targetFinishDate: form.elements.targetFinishDate.value,
+    notes: form.elements.notes.value.trim(),
+  };
   if (cloudReady()) {
     await saveCloudProject();
     await createCloudProject(template.projectName, template);
+    els.projectDialog.close();
     return;
   }
   state = template;
   render();
+  els.projectDialog.close();
   showCloudStatus("Project created locally. Unlock cloud to sync it everywhere.");
 }
 
@@ -795,8 +840,15 @@ function render() {
   renderRows();
   renderSummary();
   els.topTitle.textContent = state.projectName || "ADU Budget";
+  els.topSubtitle.textContent = projectSubtitle();
   els.projectName.value = state.projectName;
   els.contractValue.value = state.contractValue || "";
+}
+
+function projectSubtitle() {
+  const meta = state.projectMeta || {};
+  const parts = [meta.address, meta.clientName, meta.status].filter(Boolean);
+  return parts.join(" | ");
 }
 
 function renderHeader() {
@@ -1205,10 +1257,11 @@ els.cloudSignIn.addEventListener("click", signInCloud);
 els.cloudSignUp.addEventListener("click", signUpCloud);
 els.cloudSignOut.addEventListener("click", signOutCloud);
 els.projectSelect.addEventListener("change", switchCloudProject);
-els.newCloudProject.addEventListener("click", createProjectFromTemplate);
+els.newCloudProject.addEventListener("click", openProjectSetup);
 els.copyCloudProject.addEventListener("click", copyCloudProject);
 els.syncNow.addEventListener("click", saveCloudProject);
 els.form.addEventListener("submit", saveEditor);
+els.projectForm.addEventListener("submit", createProjectFromTemplate);
 els.form.elements.phase.addEventListener("change", selectParentForPhase);
 document.getElementById("saveRow").addEventListener("click", (event) => {
   event.preventDefault();
@@ -1216,6 +1269,8 @@ document.getElementById("saveRow").addEventListener("click", (event) => {
 });
 document.getElementById("closeDialog").addEventListener("click", () => els.dialog.close());
 document.getElementById("cancelEdit").addEventListener("click", () => els.dialog.close());
+document.getElementById("closeProjectDialog").addEventListener("click", () => els.projectDialog.close());
+document.getElementById("cancelProject").addEventListener("click", () => els.projectDialog.close());
 document.getElementById("deleteRow").addEventListener("click", deleteActive);
 document.getElementById("addGroup").addEventListener("click", () => addChild(activeId, "group"));
 document.getElementById("addItem").addEventListener("click", () => addChild(activeId, "item"));
